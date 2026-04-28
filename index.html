@@ -16,7 +16,7 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
         .card { transition: all 0.3s ease; }
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-out; }
@@ -50,45 +50,48 @@
         <!-- Header -->
         <header class="text-center mb-8 relative border-b pb-6">
             <h1 class="text-3xl font-black text-blue-900 mb-2">🧪 질량 보존 법칙 마스터</h1>
+            <p class="text-slate-500">화학 반응 전후의 총 질량은 변하지 않습니다.</p>
         </header>
 
         <!-- Section 1: Intro Quiz -->
         <div id="intro-quiz" class="bg-white rounded-2xl shadow-xl p-8 card fade-in text-center">
             <h2 class="text-2xl font-bold mb-6">입장 퀴즈: 질량 보존 법칙의 정의</h2>
             <div class="grid gap-4">
-                <button type="button" id="btn-intro-correct" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left">
-                    <span class="text-blue-600 font-bold mr-2">A.</span> 반응물의 총 질량과 생성물의 총 질량은 항상 같다.
+                <button type="button" id="btn-intro-correct" class="p-5 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left group">
+                    <span class="inline-block bg-blue-100 text-blue-600 font-bold px-3 py-1 rounded-lg mr-3 group-hover:bg-blue-600 group-hover:text-white">A</span> 
+                    반응물의 총 질량과 생성물의 총 질량은 항상 같다.
                 </button>
-                <button type="button" id="btn-intro-wrong" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left">
-                    <span class="text-red-400 font-bold mr-2">B.</span> 기체가 발생하는 반응에서는 질량이 항상 줄어든다.
+                <button type="button" id="btn-intro-wrong" class="p-5 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left group">
+                    <span class="inline-block bg-red-100 text-red-400 font-bold px-3 py-1 rounded-lg mr-3 group-hover:bg-red-500 group-hover:text-white">B</span> 
+                    기체가 발생하는 반응에서는 질량이 항상 줄어든다.
                 </button>
             </div>
-            <div id="intro-msg" class="mt-4 font-bold text-red-500 hidden">틀렸습니다! 질량은 사라지지 않습니다.</div>
+            <div id="intro-msg" class="mt-4 font-bold text-red-500 hidden">틀렸습니다! 질량은 사라지지 않습니다. (다시 선택하세요)</div>
         </div>
 
         <!-- Section 1.5: Rules Guide -->
-        <div id="rules-guide" class="bg-white rounded-2xl shadow-xl p-8 card hidden fade-in text-center">
+        <div id="rules-guide" class="bg-white rounded-2xl shadow-xl p-8 card hidden fade-in text-center border-t-8 border-blue-500">
             <h2 class="text-3xl font-black text-blue-800 mb-6">🎮 게임 규칙 및 배점 안내</h2>
-            <div class="space-y-4 mb-8 text-left inline-block mx-auto">
-                <div class="flex items-start gap-3">
-                    <span class="bg-blue-100 text-blue-600 p-1 px-2 rounded font-bold">1</span>
-                    <p class="text-slate-700"><b>한 번에 정답:</b> 20점 획득</p>
+            <div class="space-y-4 mb-8 text-left inline-block mx-auto max-w-md w-full">
+                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-xl">
+                    <span class="bg-blue-600 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold">1</span>
+                    <p class="text-slate-700 font-semibold"><b>한 번에 정답:</b> 20점 획득</p>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="bg-orange-100 text-orange-600 p-1 px-2 rounded font-bold">2</span>
-                    <p class="text-slate-700"><b>힌트 보고 정답:</b> 10점 획득</p>
+                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-xl">
+                    <span class="bg-orange-500 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold">2</span>
+                    <p class="text-slate-700 font-semibold"><b>힌트 보고 정답:</b> 10점 획득</p>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="bg-red-100 text-red-600 p-1 px-2 rounded font-bold">3</span>
-                    <p class="text-slate-700"><b>오답 시:</b> -10점 감점 (최하 0점)</p>
+                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-xl">
+                    <span class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold">3</span>
+                    <p class="text-slate-700 font-semibold"><b>오답 시:</b> -10점 감점 (최하 0점)</p>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="bg-pink-100 text-pink-600 p-1 px-2 rounded font-bold">4</span>
-                    <p class="text-slate-700"><b>기회:</b> 문제당 ❤️❤️ (2번)의 기회가 있습니다.</p>
+                <div class="flex items-center gap-4 bg-pink-50 p-4 rounded-xl border border-pink-100">
+                    <span class="text-xl">❤️</span>
+                    <p class="text-slate-700"><b>기회:</b> 문제당 2번의 기회가 주어집니다.</p>
                 </div>
             </div>
-            <button type="button" id="btn-start-game" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
-                게임 시작하기!
+            <button type="button" id="btn-start-game" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all active:scale-95">
+                이해했습니다! 게임 시작
             </button>
         </div>
 
@@ -103,7 +106,7 @@
                 </div>
                 <div class="text-right">
                     <div id="current-score" class="font-black text-blue-600 text-2xl">0점</div>
-                    <div id="problem-points" class="text-xs text-slate-400 font-bold italic">획득 가능: +20</div>
+                    <div id="problem-points" class="text-xs text-slate-400 font-bold italic">획득 가능 포인트: +20</div>
                 </div>
             </div>
             
@@ -112,14 +115,14 @@
             <div class="flex flex-col items-center gap-4">
                 <div class="flex items-center gap-3 w-full max-w-xs">
                     <input type="number" id="user-answer" class="w-full p-4 border-4 border-slate-100 rounded-2xl text-center text-3xl font-bold focus:border-blue-500 outline-none transition-all" placeholder="?">
-                    <button type="button" id="submit-ans-btn" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all">확인</button>
+                    <button type="button" id="submit-ans-btn" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all active:scale-95">확인</button>
                 </div>
             </div>
             
-            <div id="feedback-area" class="mt-8 p-6 bg-slate-50 rounded-2xl hidden border-2 border-slate-100">
+            <div id="feedback-area" class="mt-8 p-6 bg-slate-50 rounded-2xl hidden border-2 border-slate-100 animate-bounce-short">
                 <p id="feedback-status" class="font-bold text-xl mb-2"></p>
                 <div id="hint-box" class="text-slate-600 leading-relaxed mb-4"></div>
-                <button type="button" id="action-btn" class="w-full py-4 rounded-xl font-black text-lg shadow-md"></button>
+                <button type="button" id="action-btn" class="w-full py-4 rounded-xl font-black text-lg shadow-md transition-all active:scale-95"></button>
             </div>
         </div>
 
@@ -127,28 +130,29 @@
         <div id="result-report" class="space-y-6 hidden fade-in">
             <div class="bg-white rounded-3xl shadow-xl p-10 text-center border-b-8 border-blue-600">
                 <div class="text-6xl mb-4">🏆</div>
-                <h2 class="text-2xl font-bold text-slate-800">챌린지 완료!</h2>
-                <div id="final-score-text" class="text-5xl font-black text-blue-600 my-4">0점</div>
+                <h2 class="text-2xl font-bold text-slate-800">모든 과정을 완료했습니다!</h2>
+                <div id="final-score-text" class="text-6xl font-black text-blue-600 my-4">0점</div>
+                <p class="text-slate-500">당신은 질량 보존 법칙의 마스터입니다.</p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-lg p-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">📝 포트폴리오 작성</h3>
+                <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">📝 포트폴리오 데이터 전송</h3>
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학번 (A열)</label>
-                        <input type="text" id="student-id" placeholder="30101" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Student ID (A)</label>
+                        <input type="text" id="student-id" placeholder="예: 30101" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">이름 (B열)</label>
-                        <input type="text" id="student-name" placeholder="홍길동" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Name (B)</label>
+                        <input type="text" id="student-name" placeholder="이름 입력" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
                     </div>
                 </div>
                 <div class="mb-6">
-                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학습 요약 (C열)</label>
-                    <textarea id="learning-summary" rows="3" placeholder="질량 보존 법칙의 원리와 오늘 게임을 통해 배운 점을 적어보세요." class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none resize-none"></textarea>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Learning Summary (C)</label>
+                    <textarea id="learning-summary" rows="3" placeholder="오늘 학습한 내용과 소감을 요약해 주세요." class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none resize-none"></textarea>
                 </div>
-                <button type="button" id="btn-submit-portfolio" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
-                    포트폴리오 제출 및 구글 시트 전송
+                <button type="button" id="btn-submit-portfolio" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all active:scale-95">
+                    기록 제출하기
                 </button>
                 <p id="submit-status" class="mt-4 text-center font-bold"></p>
             </div>
@@ -160,7 +164,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
         import { getFirestore, collection, addDoc } from "firebase/firestore";
 
-        // 1. Firebase 설정
+        // 1. Firebase Config
         const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-game';
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -169,23 +173,26 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Google Script URL (for backup sheet storage)
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOWPbzjZJJvkbxGpwwNcuTevqhVAJHUzhrdgG_Q-Xh6xbod53dHNHO0hYItbpOJvw_rQ/exec"; 
 
+        // State
         let user = null;
         let currentIdx = 0;
         let totalScore = 0;
         let failCount = 0;
 
         const questions = [
-            { id: 1, equation: "2H2 + O2 → ?H2O", correct: 2, hints: "반응 전 산소 원자(O)가 2개입니다. 반응 후 H2O 분자 한 개에는 산소 원자가 1개뿐이네요. 산소 원자 수를 맞추려면 H2O는 총 몇 분자가 있어야 할까요?" },
-            { id: 2, equation: "N2 + 3H2 → ?NH3", correct: 2, hints: "반응 전 질소 원자(N)가 2개입니다. 생성물인 NH3 한 분자에는 질소 원자가 1개 들어있어요. 질소 원자 2개를 모두 사용하려면 NH3를 몇 개 만들어야 할까요?" },
-            { id: 3, equation: "CH4 + ?O2 → CO2 + 2H2O", correct: 2, hints: "반응 후 생성된 물질들을 보세요. CO2에 산소 2개, 2H2O에 산소 2개로 총 4개의 산소 원자가 필요합니다. O2 분자는 몇 개가 있어야 산소 원자 4개가 될까요?" },
-            { id: 4, equation: "2Mg + O2 → ?MgO", correct: 2, hints: "반응 전 마그네슘 원자(Mg) 2개와 산소 원자(O) 2개가 있습니다. MgO 한 덩어리에는 각각 1개씩 들어있으므로, 모든 원자를 사용하려면 몇 덩어리를 만들어야 할까요?" },
-            { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소 원자 2개와 염소 원자 2개가 각각 반응합니다. 이들이 1:1로 결합하여 생성되는 HCl은 총 몇 분자가 될지 생각해보세요." }
+            { id: 1, equation: "2H2 + O2 → ?H2O", correct: 2, hints: "반응 전 산소 원자(O)가 2개입니다. 생성물인 H2O 분자 한 개에는 산소 원자가 1개뿐이네요. 총 몇 개의 H2O가 필요할까요?" },
+            { id: 2, equation: "N2 + 3H2 → ?NH3", correct: 2, hints: "질소 원자(N)가 반응 전에 2개 있습니다. NH3 한 분자에는 질소 원자가 1개뿐입니다. 질소 원자 수를 맞추기 위한 계수는?" },
+            { id: 3, equation: "CH4 + ?O2 → CO2 + 2H2O", correct: 2, hints: "반응 후 산소 원자는 CO2(2개)와 2H2O(2개)를 합쳐 총 4개입니다. O2 분자는 몇 개가 필요할까요?" },
+            { id: 4, equation: "2Mg + O2 → ?MgO", correct: 2, hints: "반응물의 Mg 원자 2개, O 원자 2개를 모두 사용해 MgO를 만든다면 몇 덩어리가 생성될까요?" },
+            { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소와 염소가 각각 2개씩 있습니다. 1:1 결합물인 HCl은 최대 몇 분자까지 생성될까요?" }
         ];
 
-        // 2. 인증 및 초기화
+        // 2. Initialization & Event Binding
         const init = async () => {
+            console.log("Initializing Game...");
             try {
                 if (initialToken) await signInWithCustomToken(auth, initialToken);
                 else await signInAnonymously(auth);
@@ -193,37 +200,37 @@
 
             onAuthStateChanged(auth, (u) => { user = u; });
 
-            // 이벤트 리스너 명시적 연결 (DOM 요소 로드 보장)
-            const btnCorrect = document.getElementById('btn-intro-correct');
-            const btnWrong = document.getElementById('btn-intro-wrong');
+            // DOM 요소 보장 및 리스너 등록
+            const btnIntroCorrect = document.getElementById('btn-intro-correct');
+            const btnIntroWrong = document.getElementById('btn-intro-wrong');
             const btnStart = document.getElementById('btn-start-game');
             const btnSubmitAns = document.getElementById('submit-ans-btn');
             const btnPortfolio = document.getElementById('btn-submit-portfolio');
+            const btnAction = document.getElementById('action-btn');
 
-            if(btnCorrect) btnCorrect.addEventListener('click', () => checkIntro(true));
-            if(btnWrong) btnWrong.addEventListener('click', () => checkIntro(false));
-            if(btnStart) btnStart.addEventListener('click', startGame);
-            if(btnSubmitAns) btnSubmitAns.addEventListener('click', checkAnswer);
-            if(btnPortfolio) btnPortfolio.addEventListener('click', submitPortfolio);
+            // 리스너 연결
+            if(btnIntroCorrect) btnIntroCorrect.onclick = () => handleIntro(true);
+            if(btnIntroWrong) btnIntroWrong.onclick = () => handleIntro(false);
+            if(btnStart) btnStart.onclick = startGame;
+            if(btnSubmitAns) btnSubmitAns.onclick = checkAnswer;
+            if(btnPortfolio) btnPortfolio.onclick = submitPortfolio;
 
-            // 엔터키 입력 지원
-            const answerInput = document.getElementById('user-answer');
-            if(answerInput) {
-                answerInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') checkAnswer();
-                });
-            }
+            // 엔터키 지원
+            document.getElementById('user-answer').onkeypress = (e) => {
+                if (e.key === 'Enter') checkAnswer();
+            };
         };
 
-        // 3. 게임 로직 함수들
-        function checkIntro(isCorrect) {
+        // 3. Logic Functions
+        function handleIntro(isCorrect) {
+            console.log("Intro Clicked:", isCorrect);
             if (isCorrect) {
                 document.getElementById('intro-quiz').classList.add('hidden');
                 document.getElementById('rules-guide').classList.remove('hidden');
             } else {
                 const msg = document.getElementById('intro-msg');
                 msg.classList.remove('hidden');
-                setTimeout(() => msg.classList.add('hidden'), 2000);
+                setTimeout(() => msg.classList.add('hidden'), 2500);
             }
         }
 
@@ -236,17 +243,19 @@
         function loadQuestion() {
             const q = questions[currentIdx];
             failCount = 0;
-            renderHearts();
+            updateHearts();
+            
             document.getElementById('question-number').innerText = `문제 ${currentIdx + 1} / ${questions.length}`;
             document.getElementById('current-score').innerText = `${totalScore}점`;
             document.getElementById('equation-display').innerHTML = formatEquation(q.equation);
             document.getElementById('feedback-area').classList.add('hidden');
+            document.getElementById('problem-points').innerText = "획득 가능 포인트: +20";
             
             const input = document.getElementById('user-answer');
             input.value = '';
             input.disabled = false;
             document.getElementById('submit-ans-btn').disabled = false;
-            setTimeout(() => input.focus(), 100);
+            input.focus();
         }
 
         function checkAnswer() {
@@ -256,42 +265,42 @@
 
             const q = questions[currentIdx];
             const feedbackArea = document.getElementById('feedback-area');
-            feedbackArea.classList.remove('hidden');
-
             const status = document.getElementById('feedback-status');
             const hintBox = document.getElementById('hint-box');
             const actionBtn = document.getElementById('action-btn');
 
+            feedbackArea.classList.remove('hidden');
+
             if (val === q.correct) {
-                let awarded = (failCount === 0) ? 20 : 10;
-                totalScore += awarded;
-                status.innerText = "🎉 정답입니다!";
+                const gained = (failCount === 0) ? 20 : 10;
+                totalScore += gained;
+                status.innerText = "✨ 정답입니다!";
                 status.className = "font-bold text-2xl text-green-600 text-center";
-                hintBox.innerText = "훌륭합니다!";
-                actionBtn.innerText = "다음 문제";
-                actionBtn.onclick = nextQuestion;
+                hintBox.innerHTML = `<p class='text-center'>질량 보존 법칙을 완벽히 이해하셨네요!</p>`;
+                actionBtn.innerText = "다음 단계로";
+                actionBtn.onclick = nextStep;
                 actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
                 input.disabled = true;
                 document.getElementById('submit-ans-btn').disabled = true;
                 if(document.getElementById('target-box')) document.getElementById('target-box').innerText = q.correct;
             } else {
                 failCount++;
-                renderHearts();
+                updateHearts();
                 totalScore = Math.max(0, totalScore - 10);
                 document.getElementById('current-score').innerText = `${totalScore}점`;
 
                 if (failCount >= 2) {
                     status.innerText = "기회를 모두 소진했습니다.";
                     status.className = "font-bold text-2xl text-slate-500 text-center";
-                    hintBox.innerHTML = `정답은 <b>${q.correct}</b>였습니다.`;
-                    actionBtn.innerText = "다음 문제로";
-                    actionBtn.onclick = nextQuestion;
-                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-700 text-white shadow-lg";
+                    hintBox.innerHTML = `<p class='text-center'>정답은 <b>${q.correct}</b>였습니다. 다음 문제에서 만회해 보세요!</p>`;
+                    actionBtn.innerText = "다음 문제로 이동";
+                    actionBtn.onclick = nextStep;
+                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-800 text-white shadow-lg";
                     if(document.getElementById('target-box')) document.getElementById('target-box').innerText = q.correct;
                 } else {
-                    status.innerText = "❌ 오답입니다!";
+                    status.innerText = "❌ 다시 한번 생각해 볼까요?";
                     status.className = "font-bold text-2xl text-red-500 text-center";
-                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 힌트:</strong><br>${q.hints}</div>`;
+                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 Hint:</strong><br>${q.hints}</div>`;
                     actionBtn.innerText = "다시 시도";
                     actionBtn.onclick = () => { 
                         feedbackArea.classList.add('hidden'); 
@@ -299,25 +308,25 @@
                         input.focus(); 
                     };
                     actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-orange-500 text-white shadow-lg";
+                    document.getElementById('problem-points').innerText = "획득 가능 포인트: +10";
                 }
             }
         }
 
-        function nextQuestion() {
+        function nextStep() {
             currentIdx++;
             if (currentIdx < questions.length) loadQuestion();
-            else showResult();
+            else finishGame();
         }
 
-        function showResult() {
+        function finishGame() {
             document.getElementById('game-container').classList.add('hidden');
             document.getElementById('result-report').classList.remove('hidden');
             document.getElementById('final-score-text').innerText = `${totalScore}점`;
         }
 
-        function renderHearts() {
+        function updateHearts() {
             const container = document.getElementById('lives-display');
-            if(!container) return;
             container.innerHTML = '';
             for (let i = 0; i < 2; i++) {
                 const h = document.createElement('span');
@@ -328,23 +337,23 @@
         }
 
         function formatEquation(txt) {
-            const div = document.createElement('div');
-            div.className = "equation-text";
-            txt.split(/(\s\+\s|\s→\s|\?)/).forEach(p => {
-                const s = document.createElement('span');
-                if (p === "?") {
-                    s.className = "q-box";
-                    s.id = "target-box";
-                    s.innerText = "?";
-                } else if (p === " + " || p === " → ") {
-                    s.className = "mx-4 text-blue-400";
-                    s.innerText = p.trim();
-                } else if (p.trim()) {
-                    s.innerHTML = p.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
+            const wrapper = document.createElement('div');
+            wrapper.className = "equation-text";
+            txt.split(/(\s\+\s|\s→\s|\?)/).forEach(part => {
+                const el = document.createElement('span');
+                if (part === "?") {
+                    el.className = "q-box";
+                    el.id = "target-box";
+                    el.innerText = "?";
+                } else if (part === " + " || part === " → ") {
+                    el.className = "mx-3 text-blue-400 font-bold";
+                    el.innerText = part.trim();
+                } else if (part.trim()) {
+                    el.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
                 }
-                div.appendChild(s);
+                wrapper.appendChild(el);
             });
-            return div.outerHTML;
+            return wrapper.outerHTML;
         }
 
         async function submitPortfolio() {
@@ -355,22 +364,24 @@
             const submitBtn = document.getElementById('btn-submit-portfolio');
 
             if(!sid || !sname || !summary) {
-                status.innerText = "학번, 이름, 소감을 모두 입력해주세요.";
+                status.innerText = "⚠️ 모든 항목을 작성해 주세요.";
                 status.className = "mt-4 text-center font-bold text-red-500";
                 return;
             }
 
-            status.innerText = "데이터 전송 중...";
-            status.className = "mt-4 text-center font-bold text-blue-500";
             submitBtn.disabled = true;
+            status.innerText = "⏳ 전송 중입니다...";
+            status.className = "mt-4 text-center font-bold text-blue-500";
 
             try {
+                // 1. Firebase Store (Public Path)
                 if (user) {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
-                        sid, sname, score: totalScore, summary, time: new Date().toISOString()
+                        sid, sname, score: totalScore, summary, timestamp: new Date().toISOString()
                     });
                 }
                 
+                // 2. Google Sheets API (Backup)
                 const url = new URL(GOOGLE_SCRIPT_URL);
                 url.searchParams.append('sid', sid);      
                 url.searchParams.append('name', sname);    
@@ -381,21 +392,18 @@
                 
                 status.innerText = "✅ 성공적으로 제출되었습니다!";
                 status.className = "mt-4 text-center font-bold text-green-600";
-                submitBtn.style.opacity = "0.5";
+                submitBtn.innerText = "제출 완료";
+                submitBtn.classList.replace('bg-blue-600', 'bg-slate-400');
             } catch (e) {
-                console.error(e);
-                status.innerText = "제출 중 오류가 발생했습니다.";
+                console.error("Submission Error", e);
+                status.innerText = "❌ 오류가 발생했습니다. 다시 시도해 주세요.";
                 status.className = "mt-4 text-center font-bold text-red-500";
                 submitBtn.disabled = false;
             }
         }
 
-        // 초기화 실행
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        // 실행
+        window.onload = init;
     </script>
 </body>
 </html>
