@@ -50,9 +50,7 @@
         <!-- Header -->
         <header class="text-center mb-8 relative border-b pb-6">
             <h1 class="text-3xl font-black text-blue-900 mb-2">🧪 질량 보존 법칙 마스터</h1>
-            <button onclick="window.toggleAdmin()" class="bg-slate-200 hover:bg-blue-600 hover:text-white text-slate-600 px-4 py-2 rounded-full text-sm font-bold transition-all shadow-sm">
-                ⚙️ 교사용 관리 패널
-            </button>
+            <!-- 교사용 관리 패널 버튼이 학생 화면에서 제거되었습니다 -->
         </header>
 
         <!-- Section 1: Intro Quiz -->
@@ -138,30 +136,30 @@
                 <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">📝 포트폴리오 작성</h3>
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학번</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학번 (A열)</label>
                         <input type="text" id="student-id" placeholder="30101" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">이름</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">이름 (B열)</label>
                         <input type="text" id="student-name" placeholder="홍길동" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
                     </div>
                 </div>
                 <div class="mb-6">
-                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">오늘의 학습 요약</label>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학습 요약 (C열)</label>
                     <textarea id="learning-summary" rows="3" placeholder="질량 보존 법칙의 원리와 오늘 게임을 통해 배운 점을 적어보세요." class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none resize-none"></textarea>
                 </div>
                 <button onclick="window.submitPortfolio()" id="submit-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
-                    포트폴리오 제출하기
+                    포트폴리오 제출 및 구글 시트 전송
                 </button>
                 <p id="submit-status" class="mt-4 text-center font-bold"></p>
             </div>
         </div>
 
-        <!-- Admin Panel -->
+        <!-- Admin Panel (내부적으로만 존재) -->
         <div id="admin-panel" class="fixed inset-0 bg-slate-900/95 z-50 p-4 md:p-10 hidden overflow-y-auto">
             <div class="max-w-5xl mx-auto">
                 <div class="flex justify-between items-center mb-8 text-white">
-                    <h2 class="text-3xl font-black">📊 학생 데이터 관리</h2>
+                    <h2 class="text-3xl font-black">📊 학생 데이터 관리 (백업)</h2>
                     <div class="flex gap-2">
                         <button onclick="window.downloadCSV()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm">엑셀 저장</button>
                         <button onclick="window.toggleAdmin()" class="bg-white/10 px-4 py-2 rounded-lg">닫기</button>
@@ -184,6 +182,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
         import { getFirestore, collection, addDoc, onSnapshot, query } from "firebase/firestore";
 
+        // 1. Firebase 설정
         const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-game';
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -192,15 +191,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // 2. 구글 시트 연동 설정 (제공된 Web App URL 적용)
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOWPbzjZJJvkbxGpwwNcuTevqhVAJHUzhrdgG_Q-Xh6xbod53dHNHO0hYItbpOJvw_rQ/exec"; 
+
         let user = null;
         let allSubmittedData = [];
-
-        const initAuth = async () => {
-            if (initialToken) await signInWithCustomToken(auth, initialToken);
-            else await signInAnonymously(auth);
-        };
-        onAuthStateChanged(auth, (u) => { user = u; });
-        initAuth();
+        let currentIdx = 0;
+        let totalScore = 0;
+        let failCount = 0;
 
         const questions = [
             { id: 1, equation: "2H2 + O2 → ?H2O", correct: 2, hints: "반응 전 산소 원자(O)가 2개입니다. 반응 후 H2O 분자 한 개에는 산소 원자가 1개뿐이네요. 산소 원자 수를 맞추려면 H2O는 총 몇 분자가 있어야 할까요?" },
@@ -210,35 +208,15 @@
             { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소 원자 2개와 염소 원자 2개가 각각 반응합니다. 이들이 1:1로 결합하여 생성되는 HCl은 총 몇 분자가 될지 생각해보세요." }
         ];
 
-        let currentIdx = 0;
-        let totalScore = 0;
-        let failCount = 0;
+        // 초기화 및 인증
+        const initAuth = async () => {
+            if (initialToken) await signInWithCustomToken(auth, initialToken);
+            else await signInAnonymously(auth);
+        };
+        onAuthStateChanged(auth, (u) => { user = u; });
+        initAuth();
 
-        function formatEquation(eqText) {
-            const container = document.createElement('div');
-            container.className = "equation-text";
-            const parts = eqText.split(/(\s\+\s|\s→\s|\?)/);
-            parts.forEach(part => {
-                if (part === "?") {
-                    const span = document.createElement('span');
-                    span.className = "q-box";
-                    span.id = "target-box";
-                    span.innerText = "?";
-                    container.appendChild(span);
-                } else if (part === " + " || part === " → ") {
-                    const span = document.createElement('span');
-                    span.className = "mx-4 text-blue-400";
-                    span.innerText = part.trim();
-                    container.appendChild(span);
-                } else if (part.trim() !== "") {
-                    const span = document.createElement('span');
-                    span.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
-                    container.appendChild(span);
-                }
-            });
-            return container.outerHTML;
-        }
-
+        // 윈도우 전역 함수 노출
         window.checkIntro = (val) => {
             if (val === 2) {
                 document.getElementById('intro-quiz').classList.add('hidden');
@@ -282,6 +260,31 @@
             input.focus();
         };
 
+        function formatEquation(eqText) {
+            const container = document.createElement('div');
+            container.className = "equation-text";
+            const parts = eqText.split(/(\s\+\s|\s→\s|\?)/);
+            parts.forEach(part => {
+                if (part === "?") {
+                    const span = document.createElement('span');
+                    span.className = "q-box";
+                    span.id = "target-box";
+                    span.innerText = "?";
+                    container.appendChild(span);
+                } else if (part === " + " || part === " → ") {
+                    const span = document.createElement('span');
+                    span.className = "mx-4 text-blue-400";
+                    span.innerText = part.trim();
+                    container.appendChild(span);
+                } else if (part.trim() !== "") {
+                    const span = document.createElement('span');
+                    span.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
+                    container.appendChild(span);
+                }
+            });
+            return container.outerHTML;
+        }
+
         window.checkAnswer = () => {
             const input = document.getElementById('user-answer');
             const userAns = parseInt(input.value);
@@ -297,18 +300,15 @@
             if (userAns === q.correct) {
                 let awarded = (failCount === 0) ? 20 : 10;
                 totalScore += awarded;
-                status.innerText = "🎉 훌륭합니다! 정답입니다.";
+                status.innerText = "🎉 정답입니다!";
                 status.className = "font-bold text-2xl text-green-600 text-center";
-                hintBox.innerText = "원자의 종류와 개수가 반응 전후에 변하지 않음을 확인했습니다.";
-                actionBtn.innerText = "다음 단계로";
+                hintBox.innerText = "질량 보존의 법칙을 정확히 이해하셨군요!";
+                actionBtn.innerText = "다음 문제";
                 actionBtn.onclick = window.nextQuestion;
                 actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
                 input.disabled = true;
                 document.getElementById('submit-ans-btn').disabled = true;
                 targetBox.innerText = q.correct;
-                targetBox.style.animation = "none";
-                targetBox.style.backgroundColor = "rgba(34, 197, 94, 0.2)";
-                targetBox.style.borderColor = "#22c55e";
             } else {
                 failCount++;
                 renderHearts();
@@ -316,18 +316,18 @@
                 document.getElementById('current-score').innerText = `${totalScore}점`;
                 
                 if(failCount >= 2) {
-                    status.innerText = "😓 아쉽네요! 기회를 모두 사용했습니다.";
+                    status.innerText = "기회를 모두 소진했습니다.";
                     status.className = "font-bold text-2xl text-slate-500 text-center";
-                    hintBox.innerHTML = `이 반응식의 정답 계수는 <b>${q.correct}</b>였습니다.<br>정답을 확인하고 다음 문제에서 다시 도전해보세요!`;
-                    actionBtn.innerText = "정답 확인 후 다음 문제로";
+                    hintBox.innerHTML = `정답 계수는 <b>${q.correct}</b>입니다.`;
+                    actionBtn.innerText = "다음 문제로 이동";
                     actionBtn.onclick = window.nextQuestion;
                     actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-700 text-white shadow-lg";
                     targetBox.innerText = q.correct;
                 } else {
-                    status.innerText = "❌ 다시 한 번 생각해보세요!";
+                    status.innerText = "❌ 오답입니다!";
                     status.className = "font-bold text-2xl text-red-500 text-center";
-                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 생각할 거리:</strong><br>${q.hints}</div>`;
-                    actionBtn.innerText = "다시 입력하기";
+                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 힌트:</strong><br>${q.hints}</div>`;
+                    actionBtn.innerText = "다시 도전";
                     actionBtn.onclick = () => { feedbackArea.classList.add('hidden'); input.value = ''; input.focus(); };
                     actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-orange-500 text-white shadow-lg";
                     document.getElementById('problem-points').innerText = `획득 가능: +10`;
@@ -347,34 +347,56 @@
             document.getElementById('final-score-text').innerText = `${totalScore}점`;
         };
 
+        // 포트폴리오 제출 및 구글 시트 전송
         window.submitPortfolio = async () => {
             const sid = document.getElementById('student-id').value.trim();
             const sname = document.getElementById('student-name').value.trim();
             const summary = document.getElementById('learning-summary').value.trim();
             const status = document.getElementById('submit-status');
+            
             if(!sid || !sname || !summary) {
-                status.innerText = "빈 칸을 모두 채워주세요!";
+                status.innerText = "모든 정보를 입력해주세요!";
                 status.className = "mt-4 text-center font-bold text-red-500";
                 return;
             }
+
             status.innerText = "데이터 전송 중...";
+            status.className = "mt-4 text-center font-bold text-blue-500";
+
             try {
+                // 1. Firebase 백업 저장
                 if (user) {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
                         studentId: sid, studentName: sname, score: totalScore, summary: summary, timestamp: new Date().toISOString()
                     });
-                    status.innerText = "✅ 성공적으로 제출되었습니다!";
-                    status.className = "mt-4 text-center font-bold text-green-600";
-                    document.getElementById('submit-btn').disabled = true;
-                    document.getElementById('submit-btn').classList.add('opacity-50');
                 }
-            } catch (err) { status.innerText = "전송 오류 발생"; }
+
+                // 2. 구글 시트로 데이터 전송
+                // Web App URL에 파라미터를 실어 보냄
+                const url = new URL(GOOGLE_SCRIPT_URL);
+                url.searchParams.append('sid', sid);
+                url.searchParams.append('name', sname);
+                url.searchParams.append('summary', summary);
+                url.searchParams.append('score', totalScore);
+
+                await fetch(url, { method: 'POST', mode: 'no-cors' });
+
+                status.innerText = "✅ 성공적으로 제출 및 시트에 기록되었습니다!";
+                status.className = "mt-4 text-center font-bold text-green-600";
+                document.getElementById('submit-btn').disabled = true;
+                document.getElementById('submit-btn').classList.add('opacity-50');
+            } catch (err) { 
+                console.error(err);
+                status.innerText = "전송 중 오류가 발생했습니다.";
+                status.className = "mt-4 text-center font-bold text-red-500";
+            }
         };
 
+        // 관리자 패널 (숨김 처리됨, 콘솔창에서 window.toggleAdmin()으로 호출 가능)
         window.toggleAdmin = () => {
             const panel = document.getElementById('admin-panel');
             if (panel.classList.contains('hidden')) {
-                if (prompt("관리자 암호를 입력하세요:") === "1234") {
+                if (prompt("관리자 암호:") === "1234") {
                     panel.classList.remove('hidden');
                     loadAdminData();
                 }
@@ -391,8 +413,7 @@
                     const data = doc.data();
                     allSubmittedData.push(data);
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors";
-                    tr.innerHTML = `<td class="p-4 font-bold border-b">${data.studentId}</td><td class="p-4 border-b">${data.studentName}</td><td class="p-4 text-center font-bold text-blue-600 border-b">${data.score}</td><td class="p-4 text-sm border-b">${data.summary}</td><td class="p-4 text-right text-xs text-slate-400 border-b">${new Date(data.timestamp).toLocaleString()}</td>`;
+                    tr.innerHTML = `<td class="p-4 border-b font-bold">${data.studentId}</td><td class="p-4 border-b">${data.studentName}</td><td class="p-4 border-b text-center text-blue-600 font-bold">${data.score}</td><td class="p-4 border-b text-sm">${data.summary}</td><td class="p-4 border-b text-right text-xs text-slate-400">${new Date(data.timestamp).toLocaleString()}</td>`;
                     listEl.appendChild(tr);
                 });
             });
@@ -400,7 +421,7 @@
 
         window.downloadCSV = () => {
             if (allSubmittedData.length === 0) return;
-            let csv = "\uFEFF학번,이름,점수,학습내용,제출시간\n";
+            let csv = "\uFEFF학번,이름,점수,학습요약,제출시간\n";
             allSubmittedData.forEach(i => csv += `"${i.studentId}","${i.studentName}","${i.score}","${i.summary.replace(/"/g, '""')}","${i.timestamp}"\n`);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
