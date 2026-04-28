@@ -57,11 +57,11 @@
         <div id="intro-quiz" class="bg-white rounded-2xl shadow-xl p-8 card fade-in text-center">
             <h2 class="text-2xl font-bold mb-6">입장 퀴즈: 질량 보존 법칙의 정의</h2>
             <div class="grid gap-4">
-                <button type="button" id="btn-intro-correct" class="p-5 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left group">
+                <button type="button" onclick="handleIntro(true)" class="p-5 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left group">
                     <span class="inline-block bg-blue-100 text-blue-600 font-bold px-3 py-1 rounded-lg mr-3 group-hover:bg-blue-600 group-hover:text-white">A</span> 
                     반응물의 총 질량과 생성물의 총 질량은 항상 같다.
                 </button>
-                <button type="button" id="btn-intro-wrong" class="p-5 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left group">
+                <button type="button" onclick="handleIntro(false)" class="p-5 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left group">
                     <span class="inline-block bg-red-100 text-red-400 font-bold px-3 py-1 rounded-lg mr-3 group-hover:bg-red-500 group-hover:text-white">B</span> 
                     기체가 발생하는 반응에서는 질량이 항상 줄어든다.
                 </button>
@@ -90,7 +90,7 @@
                     <p class="text-slate-700"><b>기회:</b> 문제당 2번의 기회가 주어집니다.</p>
                 </div>
             </div>
-            <button type="button" id="btn-start-game" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all active:scale-95">
+            <button type="button" onclick="startGame()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all active:scale-95">
                 이해했습니다! 게임 시작
             </button>
         </div>
@@ -115,11 +115,11 @@
             <div class="flex flex-col items-center gap-4">
                 <div class="flex items-center gap-3 w-full max-w-xs">
                     <input type="number" id="user-answer" class="w-full p-4 border-4 border-slate-100 rounded-2xl text-center text-3xl font-bold focus:border-blue-500 outline-none transition-all" placeholder="?">
-                    <button type="button" id="submit-ans-btn" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all active:scale-95">확인</button>
+                    <button type="button" onclick="checkAnswer()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all active:scale-95">확인</button>
                 </div>
             </div>
             
-            <div id="feedback-area" class="mt-8 p-6 bg-slate-50 rounded-2xl hidden border-2 border-slate-100 animate-bounce-short">
+            <div id="feedback-area" class="mt-8 p-6 bg-slate-50 rounded-2xl hidden border-2 border-slate-100">
                 <p id="feedback-status" class="font-bold text-xl mb-2"></p>
                 <div id="hint-box" class="text-slate-600 leading-relaxed mb-4"></div>
                 <button type="button" id="action-btn" class="w-full py-4 rounded-xl font-black text-lg shadow-md transition-all active:scale-95"></button>
@@ -139,19 +139,19 @@
                 <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">📝 포트폴리오 데이터 전송</h3>
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Student ID (A)</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Student ID</label>
                         <input type="text" id="student-id" placeholder="예: 30101" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Name (B)</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Name</label>
                         <input type="text" id="student-name" placeholder="이름 입력" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
                     </div>
                 </div>
                 <div class="mb-6">
-                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Learning Summary (C)</label>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1 uppercase">Learning Summary</label>
                     <textarea id="learning-summary" rows="3" placeholder="오늘 학습한 내용과 소감을 요약해 주세요." class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none resize-none"></textarea>
                 </div>
-                <button type="button" id="btn-submit-portfolio" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all active:scale-95">
+                <button type="button" id="btn-submit-portfolio" onclick="submitPortfolio()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all active:scale-95">
                     기록 제출하기
                 </button>
                 <p id="submit-status" class="mt-4 text-center font-bold"></p>
@@ -166,15 +166,15 @@
 
         // 1. Firebase Config
         const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-game';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-master';
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Google Script URL (for backup sheet storage)
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOWPbzjZJJvkbxGpwwNcuTevqhVAJHUzhrdgG_Q-Xh6xbod53dHNHO0hYItbpOJvw_rQ/exec"; 
+        // [중요] 구글 앱스 스크립트 배포 URL을 여기에 입력하세요!
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfbgKRovTdUo5SVokv2LrqThJRaWHe6ukc0v1WW_VqXX84c4lUrIxJr5CoVlYnP_fh8g/exec"; 
 
         // State
         let user = null;
@@ -190,40 +190,17 @@
             { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소와 염소가 각각 2개씩 있습니다. 1:1 결합물인 HCl은 최대 몇 분자까지 생성될까요?" }
         ];
 
-        // 2. Initialization & Event Binding
+        // 2. Initialization
         const init = async () => {
-            console.log("Initializing Game...");
             try {
                 if (initialToken) await signInWithCustomToken(auth, initialToken);
                 else await signInAnonymously(auth);
             } catch (e) { console.error("Auth Error", e); }
-
             onAuthStateChanged(auth, (u) => { user = u; });
-
-            // DOM 요소 보장 및 리스너 등록
-            const btnIntroCorrect = document.getElementById('btn-intro-correct');
-            const btnIntroWrong = document.getElementById('btn-intro-wrong');
-            const btnStart = document.getElementById('btn-start-game');
-            const btnSubmitAns = document.getElementById('submit-ans-btn');
-            const btnPortfolio = document.getElementById('btn-submit-portfolio');
-            const btnAction = document.getElementById('action-btn');
-
-            // 리스너 연결
-            if(btnIntroCorrect) btnIntroCorrect.onclick = () => handleIntro(true);
-            if(btnIntroWrong) btnIntroWrong.onclick = () => handleIntro(false);
-            if(btnStart) btnStart.onclick = startGame;
-            if(btnSubmitAns) btnSubmitAns.onclick = checkAnswer;
-            if(btnPortfolio) btnPortfolio.onclick = submitPortfolio;
-
-            // 엔터키 지원
-            document.getElementById('user-answer').onkeypress = (e) => {
-                if (e.key === 'Enter') checkAnswer();
-            };
         };
 
-        // 3. Logic Functions
-        function handleIntro(isCorrect) {
-            console.log("Intro Clicked:", isCorrect);
+        // 3. UI Navigation Logic
+        window.handleIntro = (isCorrect) => {
             if (isCorrect) {
                 document.getElementById('intro-quiz').classList.add('hidden');
                 document.getElementById('rules-guide').classList.remove('hidden');
@@ -232,13 +209,13 @@
                 msg.classList.remove('hidden');
                 setTimeout(() => msg.classList.add('hidden'), 2500);
             }
-        }
+        };
 
-        function startGame() {
+        window.startGame = () => {
             document.getElementById('rules-guide').classList.add('hidden');
             document.getElementById('game-container').classList.remove('hidden');
             loadQuestion();
-        }
+        };
 
         function loadQuestion() {
             const q = questions[currentIdx];
@@ -254,11 +231,10 @@
             const input = document.getElementById('user-answer');
             input.value = '';
             input.disabled = false;
-            document.getElementById('submit-ans-btn').disabled = false;
             input.focus();
         }
 
-        function checkAnswer() {
+        window.checkAnswer = () => {
             const input = document.getElementById('user-answer');
             const val = parseInt(input.value);
             if (isNaN(val)) return;
@@ -276,12 +252,11 @@
                 totalScore += gained;
                 status.innerText = "✨ 정답입니다!";
                 status.className = "font-bold text-2xl text-green-600 text-center";
-                hintBox.innerHTML = `<p class='text-center'>질량 보존 법칙을 완벽히 이해하셨네요!</p>`;
+                hintBox.innerHTML = `<p class='text-center text-slate-500'>질량 보존 법칙 마스터에 한 걸음 더 다가갔습니다!</p>`;
                 actionBtn.innerText = "다음 단계로";
                 actionBtn.onclick = nextStep;
                 actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
                 input.disabled = true;
-                document.getElementById('submit-ans-btn').disabled = true;
                 if(document.getElementById('target-box')) document.getElementById('target-box').innerText = q.correct;
             } else {
                 failCount++;
@@ -300,7 +275,7 @@
                 } else {
                     status.innerText = "❌ 다시 한번 생각해 볼까요?";
                     status.className = "font-bold text-2xl text-red-500 text-center";
-                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 Hint:</strong><br>${q.hints}</div>`;
+                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400 text-sm"><strong>💡 힌트:</strong><br>${q.hints}</div>`;
                     actionBtn.innerText = "다시 시도";
                     actionBtn.onclick = () => { 
                         feedbackArea.classList.add('hidden'); 
@@ -311,7 +286,7 @@
                     document.getElementById('problem-points').innerText = "획득 가능 포인트: +10";
                 }
             }
-        }
+        };
 
         function nextStep() {
             currentIdx++;
@@ -356,7 +331,8 @@
             return wrapper.outerHTML;
         }
 
-        async function submitPortfolio() {
+        // Portfolio Submission Logic
+        window.submitPortfolio = async () => {
             const sid = document.getElementById('student-id').value.trim();
             const sname = document.getElementById('student-name').value.trim();
             const summary = document.getElementById('learning-summary').value.trim();
@@ -374,21 +350,23 @@
             status.className = "mt-4 text-center font-bold text-blue-500";
 
             try {
-                // 1. Firebase Store (Public Path)
+                // 1. Firebase (Back-end Storage)
                 if (user) {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
                         sid, sname, score: totalScore, summary, timestamp: new Date().toISOString()
                     });
                 }
                 
-                // 2. Google Sheets API (Backup)
-                const url = new URL(GOOGLE_SCRIPT_URL);
-                url.searchParams.append('sid', sid);      
-                url.searchParams.append('name', sname);    
-                url.searchParams.append('summary', summary); 
-                url.searchParams.append('score', totalScore);
-                
-                await fetch(url, { method: 'POST', mode: 'no-cors' });
+                // 2. Google Sheets API (External Connectivity)
+                if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "여기에_배포_URL을_입력하세요") {
+                    const url = new URL(GOOGLE_SCRIPT_URL);
+                    url.searchParams.append('sid', sid);      
+                    url.searchParams.append('name', sname);    
+                    url.searchParams.append('summary', summary); 
+                    url.searchParams.append('score', totalScore);
+                    
+                    await fetch(url, { method: 'POST', mode: 'no-cors' });
+                }
                 
                 status.innerText = "✅ 성공적으로 제출되었습니다!";
                 status.className = "mt-4 text-center font-bold text-green-600";
@@ -400,9 +378,14 @@
                 status.className = "mt-4 text-center font-bold text-red-500";
                 submitBtn.disabled = false;
             }
-        }
+        };
 
-        // 실행
+        document.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter' && !document.getElementById('game-container').classList.contains('hidden')) {
+                window.checkAnswer();
+            }
+        });
+
         window.onload = init;
     </script>
 </body>
