@@ -80,7 +80,7 @@
                 </div>
                 <div class="flex items-start gap-3">
                     <span class="bg-red-100 text-red-600 p-1 px-2 rounded font-bold">3</span>
-                    <p class="text-slate-700"><b>오답 시:</b> -20점 (최하 0점)</p>
+                    <p class="text-slate-700"><b>오답 시:</b> -10점 감점 (최하 0점)</p>
                 </div>
                 <div class="flex items-start gap-3">
                     <span class="bg-pink-100 text-pink-600 p-1 px-2 rounded font-bold">4</span>
@@ -153,30 +153,12 @@
                 <p id="submit-status" class="mt-4 text-center font-bold"></p>
             </div>
         </div>
-
-        <!-- Admin Panel -->
-        <div id="admin-panel" class="fixed inset-0 bg-slate-900/95 z-50 p-4 md:p-10 hidden overflow-y-auto">
-            <div class="max-w-5xl mx-auto">
-                <div class="flex justify-between items-center mb-8 text-white">
-                    <h2 class="text-3xl font-black">📊 데이터 백업 확인</h2>
-                    <button type="button" id="btn-close-admin" class="bg-white/10 px-4 py-2 rounded-lg text-white">닫기</button>
-                </div>
-                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-100 text-slate-600 font-bold">
-                            <tr><th class="p-4">학번</th><th class="p-4">이름</th><th class="p-4 text-center">점수</th><th class="p-4">내용</th></tr>
-                        </thead>
-                        <tbody id="admin-portfolio-list" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "firebase/app";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
-        import { getFirestore, collection, addDoc, onSnapshot, query } from "firebase/firestore";
+        import { getFirestore, collection, addDoc } from "firebase/firestore";
 
         // 1. Firebase 설정
         const firebaseConfig = JSON.parse(__firebase_config);
@@ -187,7 +169,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 구글 시트 웹 앱 URL (배포된 URL 사용)
+        // 구글 시트 웹 앱 URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOWPbzjZJJvkbxGpwwNcuTevqhVAJHUzhrdgG_Q-Xh6xbod53dHNHO0hYItbpOJvw_rQ/exec"; 
 
         let user = null;
@@ -213,7 +195,7 @@
         onAuthStateChanged(auth, (u) => { user = u; });
         initAuth();
 
-        // 3. 게임 기능 함수 정의
+        // 3. 게임 엔진 함수
         const checkIntro = (isCorrect) => {
             if (isCorrect) {
                 document.getElementById('intro-quiz').classList.add('hidden');
@@ -264,14 +246,13 @@
                 totalScore += awarded;
                 status.innerText = "🎉 정답입니다!";
                 status.className = "font-bold text-2xl text-green-600 text-center";
-                hintBox.innerText = "훌륭합니다! 질량 보존 법칙을 완벽히 이해하셨네요.";
+                hintBox.innerText = "훌륭합니다!";
                 actionBtn.innerText = "다음 문제";
                 actionBtn.onclick = nextQuestion;
                 actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
                 input.disabled = true;
                 document.getElementById('submit-ans-btn').disabled = true;
-                const target = document.getElementById('target-box');
-                if(target) target.innerText = q.correct;
+                if(document.getElementById('target-box')) document.getElementById('target-box').innerText = q.correct;
             } else {
                 failCount++;
                 renderHearts();
@@ -281,12 +262,11 @@
                 if (failCount >= 2) {
                     status.innerText = "기회를 모두 소진했습니다.";
                     status.className = "font-bold text-2xl text-slate-500 text-center";
-                    hintBox.innerHTML = `정답 계수는 <b>${q.correct}</b>였습니다.`;
+                    hintBox.innerHTML = `정답은 <b>${q.correct}</b>였습니다.`;
                     actionBtn.innerText = "다음 문제로";
                     actionBtn.onclick = nextQuestion;
                     actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-700 text-white shadow-lg";
-                    const target = document.getElementById('target-box');
-                    if(target) target.innerText = q.correct;
+                    if(document.getElementById('target-box')) document.getElementById('target-box').innerText = q.correct;
                 } else {
                     status.innerText = "❌ 오답입니다!";
                     status.className = "font-bold text-2xl text-red-500 text-center";
@@ -359,66 +339,36 @@
             submitBtn.disabled = true;
 
             try {
-                // Firebase 저장
                 if (user) {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
                         sid, sname, score: totalScore, summary, time: new Date().toISOString()
                     });
                 }
                 
-                // 구글 시트 전송 (이미지의 헤더에 맞게 파라미터 구성)
                 const url = new URL(GOOGLE_SCRIPT_URL);
-                url.searchParams.append('sid', sid);      // 학번
-                url.searchParams.append('name', sname);    // 이름
-                url.searchParams.append('summary', summary); // 학습요약
+                url.searchParams.append('sid', sid);      
+                url.searchParams.append('name', sname);    
+                url.searchParams.append('summary', summary); 
                 url.searchParams.append('score', totalScore);
                 
-                // mode: 'no-cors'는 응답을 읽을 수 없지만 데이터는 전송됩니다.
                 await fetch(url, { method: 'POST', mode: 'no-cors' });
                 
                 status.innerText = "✅ 성공적으로 제출되었습니다!";
                 status.className = "mt-4 text-center font-bold text-green-600";
                 submitBtn.style.opacity = "0.5";
             } catch (e) {
-                console.error(e);
-                status.innerText = "제출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+                status.innerText = "제출 중 오류가 발생했습니다.";
                 status.className = "mt-4 text-center font-bold text-red-500";
                 submitBtn.disabled = false;
             }
         };
 
-        // 4. 이벤트 리스너 연결
+        // 이벤트 연결
         document.getElementById('btn-intro-correct').addEventListener('click', () => checkIntro(true));
         document.getElementById('btn-intro-wrong').addEventListener('click', () => checkIntro(false));
         document.getElementById('btn-start-game').addEventListener('click', startGame);
         document.getElementById('submit-ans-btn').addEventListener('click', checkAnswer);
         document.getElementById('btn-submit-portfolio').addEventListener('click', submitPortfolio);
-        document.getElementById('btn-close-admin').addEventListener('click', () => document.getElementById('admin-panel').classList.add('hidden'));
-
-        // 전역 접근용
-        window.toggleAdmin = () => {
-            const p = document.getElementById('admin-panel');
-            if(p.classList.contains('hidden')) {
-                if(prompt("관리자 비밀번호를 입력하세요:") === "1234") {
-                    p.classList.remove('hidden');
-                    loadAdmin();
-                }
-            } else p.classList.add('hidden');
-        };
-
-        const loadAdmin = () => {
-            const body = document.getElementById('admin-portfolio-list');
-            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'));
-            onSnapshot(q, (snap) => {
-                body.innerHTML = '';
-                snap.forEach(d => {
-                    const row = d.data();
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td class="p-4 border-b font-bold">${row.sid}</td><td class="p-4 border-b">${row.sname}</td><td class="p-4 border-b text-center">${row.score}</td><td class="p-4 border-b text-sm">${row.summary}</td>`;
-                    body.appendChild(tr);
-                });
-            }, (err) => console.error("Admin Load Error", err));
-        };
     </script>
 </body>
 </html>
