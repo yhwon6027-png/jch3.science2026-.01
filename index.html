@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>질량 보존 법칙 마스터 & 포트폴리오</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s ease; }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .equation-text { font-family: 'Consolas', 'Monaco', monospace; display: flex; align-items: center; justify-content: center; gap: 0.2rem; flex-wrap: wrap; }
+        .sub { font-size: 0.6em; vertical-align: sub; margin-left: 1px; }
+        .q-box { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 2.5rem; 
+            height: 2.5rem; 
+            border: 3px solid #3b82f6; 
+            border-radius: 0.5rem; 
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            margin: 0 0.25rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { border-color: #3b82f6; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            50% { border-color: #60a5fa; box-shadow: 0 0 10px 2px rgba(59, 130, 246, 0.2); }
+        }
+        .heart { font-size: 1.5rem; transition: all 0.3s ease; }
+        .heart-empty { opacity: 0.3; filter: grayscale(1); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8 relative border-b pb-6">
+            <h1 class="text-3xl font-black text-blue-900 mb-2">🧪 질량 보존 법칙 마스터</h1>
+            <button onclick="window.toggleAdmin()" class="bg-slate-200 hover:bg-blue-600 hover:text-white text-slate-600 px-4 py-2 rounded-full text-sm font-bold transition-all shadow-sm">
+                ⚙️ 교사용 관리 패널
+            </button>
+        </header>
+
+        <!-- Section 1: Intro Quiz -->
+        <div id="intro-quiz" class="bg-white rounded-2xl shadow-xl p-8 card fade-in text-center">
+            <h2 class="text-2xl font-bold mb-6">입장 퀴즈: 질량 보존 법칙의 정의</h2>
+            <div class="grid gap-4">
+                <button onclick="window.checkIntro(2)" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left">
+                    <span class="text-blue-600 font-bold mr-2">A.</span> 반응물의 총 질량과 생성물의 총 질량은 항상 같다.
+                </button>
+                <button onclick="window.checkIntro(1)" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left">
+                    <span class="text-red-400 font-bold mr-2">B.</span> 기체가 발생하는 반응에서는 질량이 항상 줄어든다.
+                </button>
+            </div>
+            <div id="intro-msg" class="mt-4 font-bold text-red-500 hidden">틀렸습니다! 질량은 사라지지 않습니다.</div>
+        </div>
+
+        <!-- Section 1.5: Rules Guide -->
+        <div id="rules-guide" class="bg-white rounded-2xl shadow-xl p-8 card hidden fade-in text-center">
+            <h2 class="text-3xl font-black text-blue-800 mb-6">🎮 게임 규칙 및 배점 안내</h2>
+            <div class="space-y-4 mb-8 text-left inline-block mx-auto">
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 p-1 px-2 rounded font-bold">1</span>
+                    <p class="text-slate-700"><b>한 번에 정답:</b> 20점 획득</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-orange-100 text-orange-600 p-1 px-2 rounded font-bold">2</span>
+                    <p class="text-slate-700"><b>힌트 보고 정답:</b> 10점 획득</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-red-100 text-red-600 p-1 px-2 rounded font-bold">3</span>
+                    <p class="text-slate-700"><b>오답 시:</b> -20점 (최하 0점)</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-pink-100 text-pink-600 p-1 px-2 rounded font-bold">4</span>
+                    <p class="text-slate-700"><b>기회:</b> 문제당 ❤️❤️ (2번)의 기회가 있습니다.</p>
+                </div>
+            </div>
+            <button onclick="window.startGame()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
+                게임 시작하기!
+            </button>
+        </div>
+
+        <!-- Section 2: Game Engine -->
+        <div id="game-container" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 card hidden fade-in">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <span id="question-number" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg font-bold text-sm">문제 1 / 5</span>
+                    <div id="lives-display" class="flex gap-1 mt-2">
+                        <span class="heart">❤️</span><span class="heart">❤️</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div id="current-score" class="font-black text-blue-600 text-2xl">0점</div>
+                    <div id="problem-points" class="text-xs text-slate-400 font-bold italic">획득 가능: +20</div>
+                </div>
+            </div>
+            
+            <div id="equation-display" class="equation-text text-2xl md:text-4xl bg-slate-900 text-white py-12 rounded-2xl mb-8 shadow-inner tracking-tight"></div>
+            
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex items-center gap-3 w-full max-w-xs">
+                    <input type="number" id="user-answer" class="w-full p-4 border-4 border-slate-100 rounded-2xl text-center text-3xl font-bold focus:border-blue-500 outline-none transition-all" placeholder="?">
+                    <button id="submit-ans-btn" onclick="window.checkAnswer()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all">확인</button>
+                </div>
+            </div>
+            
+            <div id="feedback-area" class="mt-8 p-6 bg-slate-50 rounded-2xl hidden border-2 border-slate-100">
+                <p id="feedback-status" class="font-bold text-xl mb-2"></p>
+                <div id="hint-box" class="text-slate-600 leading-relaxed mb-4"></div>
+                <button id="action-btn" class="w-full py-4 rounded-xl font-black text-lg shadow-md"></button>
+            </div>
+        </div>
+
+        <!-- Section 3: Result & Submission -->
+        <div id="result-report" class="space-y-6 hidden fade-in">
+            <div class="bg-white rounded-3xl shadow-xl p-10 text-center border-b-8 border-blue-600">
+                <div class="text-6xl mb-4">🏆</div>
+                <h2 class="text-2xl font-bold text-slate-800">챌린지 완료!</h2>
+                <div id="final-score-text" class="text-5xl font-black text-blue-600 my-4">0점</div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">📝 포트폴리오 작성</h3>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학번</label>
+                        <input type="text" id="student-id" placeholder="30101" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">이름</label>
+                        <input type="text" id="student-name" placeholder="홍길동" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">오늘의 학습 요약</label>
+                    <textarea id="learning-summary" rows="3" placeholder="질량 보존 법칙의 원리와 오늘 게임을 통해 배운 점을 적어보세요." class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none resize-none"></textarea>
+                </div>
+                <button onclick="window.submitPortfolio()" id="submit-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
+                    포트폴리오 제출하기
+                </button>
+                <p id="submit-status" class="mt-4 text-center font-bold"></p>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="admin-panel" class="fixed inset-0 bg-slate-900/95 z-50 p-4 md:p-10 hidden overflow-y-auto">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex justify-between items-center mb-8 text-white">
+                    <h2 class="text-3xl font-black">📊 학생 데이터 관리</h2>
+                    <div class="flex gap-2">
+                        <button onclick="window.downloadCSV()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm">엑셀 저장</button>
+                        <button onclick="window.toggleAdmin()" class="bg-white/10 px-4 py-2 rounded-lg">닫기</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100 text-slate-600 font-bold">
+                            <tr><th class="p-4">학번</th><th class="p-4">이름</th><th class="p-4 text-center">점수</th><th class="p-4">내용</th><th class="p-4 text-right">제출일시</th></tr>
+                        </thead>
+                        <tbody id="admin-portfolio-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
+        import { getFirestore, collection, addDoc, onSnapshot, query } from "firebase/firestore";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-game';
+        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let user = null;
+        let allSubmittedData = [];
+
+        const initAuth = async () => {
+            if (initialToken) await signInWithCustomToken(auth, initialToken);
+            else await signInAnonymously(auth);
+        };
+        onAuthStateChanged(auth, (u) => { user = u; });
+        initAuth();
+
+        const questions = [
+            { id: 1, equation: "2H2 + O2 → ?H2O", correct: 2, hints: "반응 전 산소 원자(O)가 2개입니다. 반응 후 H2O 분자 한 개에는 산소 원자가 1개뿐이네요. 산소 원자 수를 맞추려면 H2O는 총 몇 분자가 있어야 할까요?" },
+            { id: 2, equation: "N2 + 3H2 → ?NH3", correct: 2, hints: "반응 전 질소 원자(N)가 2개입니다. 생성물인 NH3 한 분자에는 질소 원자가 1개 들어있어요. 질소 원자 2개를 모두 사용하려면 NH3를 몇 개 만들어야 할까요?" },
+            { id: 3, equation: "CH4 + ?O2 → CO2 + 2H2O", correct: 2, hints: "반응 후 생성된 물질들을 보세요. CO2에 산소 2개, 2H2O에 산소 2개로 총 4개의 산소 원자가 필요합니다. O2 분자는 몇 개가 있어야 산소 원자 4개가 될까요?" },
+            { id: 4, equation: "2Mg + O2 → ?MgO", correct: 2, hints: "반응 전 마그네슘 원자(Mg) 2개와 산소 원자(O) 2개가 있습니다. MgO 한 덩어리에는 각각 1개씩 들어있으므로, 모든 원자를 사용하려면 몇 덩어리를 만들어야 할까요?" },
+            { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소 원자 2개와 염소 원자 2개가 각각 반응합니다. 이들이 1:1로 결합하여 생성되는 HCl은 총 몇 분자가 될지 생각해보세요." }
+        ];
+
+        let currentIdx = 0;
+        let totalScore = 0;
+        let failCount = 0;
+
+        function formatEquation(eqText) {
+            const container = document.createElement('div');
+            container.className = "equation-text";
+            const parts = eqText.split(/(\s\+\s|\s→\s|\?)/);
+            parts.forEach(part => {
+                if (part === "?") {
+                    const span = document.createElement('span');
+                    span.className = "q-box";
+                    span.id = "target-box";
+                    span.innerText = "?";
+                    container.appendChild(span);
+                } else if (part === " + " || part === " → ") {
+                    const span = document.createElement('span');
+                    span.className = "mx-4 text-blue-400";
+                    span.innerText = part.trim();
+                    container.appendChild(span);
+                } else if (part.trim() !== "") {
+                    const span = document.createElement('span');
+                    span.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
+                    container.appendChild(span);
+                }
+            });
+            return container.outerHTML;
+        }
+
+        window.checkIntro = (val) => {
+            if (val === 2) {
+                document.getElementById('intro-quiz').classList.add('hidden');
+                document.getElementById('rules-guide').classList.remove('hidden');
+            } else {
+                document.getElementById('intro-msg').classList.remove('hidden');
+                setTimeout(() => document.getElementById('intro-msg').classList.add('hidden'), 2000);
+            }
+        };
+
+        window.startGame = () => {
+            document.getElementById('rules-guide').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+            loadQuestion();
+        };
+
+        const renderHearts = () => {
+            const container = document.getElementById('lives-display');
+            container.innerHTML = '';
+            for (let i = 0; i < 2; i++) {
+                const heart = document.createElement('span');
+                heart.className = i < (2 - failCount) ? "heart" : "heart heart-empty";
+                heart.innerText = "❤️";
+                container.appendChild(heart);
+            }
+        };
+
+        const loadQuestion = () => {
+            const q = questions[currentIdx];
+            failCount = 0;
+            renderHearts();
+            document.getElementById('question-number').innerText = `문제 ${currentIdx + 1} / ${questions.length}`;
+            document.getElementById('current-score').innerText = `${totalScore}점`;
+            document.getElementById('problem-points').innerText = `획득 가능: +20`;
+            document.getElementById('equation-display').innerHTML = formatEquation(q.equation);
+            document.getElementById('feedback-area').classList.add('hidden');
+            const input = document.getElementById('user-answer');
+            input.value = '';
+            input.disabled = false;
+            document.getElementById('submit-ans-btn').disabled = false;
+            input.focus();
+        };
+
+        window.checkAnswer = () => {
+            const input = document.getElementById('user-answer');
+            const userAns = parseInt(input.value);
+            if (isNaN(userAns)) return;
+            const q = questions[currentIdx];
+            const feedbackArea = document.getElementById('feedback-area');
+            const status = document.getElementById('feedback-status');
+            const hintBox = document.getElementById('hint-box');
+            const actionBtn = document.getElementById('action-btn');
+            const targetBox = document.getElementById('target-box');
+            feedbackArea.classList.remove('hidden');
+
+            if (userAns === q.correct) {
+                let awarded = (failCount === 0) ? 20 : 10;
+                totalScore += awarded;
+                status.innerText = "🎉 훌륭합니다! 정답입니다.";
+                status.className = "font-bold text-2xl text-green-600 text-center";
+                hintBox.innerText = "원자의 종류와 개수가 반응 전후에 변하지 않음을 확인했습니다.";
+                actionBtn.innerText = "다음 단계로";
+                actionBtn.onclick = window.nextQuestion;
+                actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
+                input.disabled = true;
+                document.getElementById('submit-ans-btn').disabled = true;
+                targetBox.innerText = q.correct;
+                targetBox.style.animation = "none";
+                targetBox.style.backgroundColor = "rgba(34, 197, 94, 0.2)";
+                targetBox.style.borderColor = "#22c55e";
+            } else {
+                failCount++;
+                renderHearts();
+                totalScore = Math.max(0, totalScore - 20);
+                document.getElementById('current-score').innerText = `${totalScore}점`;
+                
+                if(failCount >= 2) {
+                    status.innerText = "😓 아쉽네요! 기회를 모두 사용했습니다.";
+                    status.className = "font-bold text-2xl text-slate-500 text-center";
+                    hintBox.innerHTML = `이 반응식의 정답 계수는 <b>${q.correct}</b>였습니다.<br>정답을 확인하고 다음 문제에서 다시 도전해보세요!`;
+                    actionBtn.innerText = "정답 확인 후 다음 문제로";
+                    actionBtn.onclick = window.nextQuestion;
+                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-700 text-white shadow-lg";
+                    targetBox.innerText = q.correct;
+                } else {
+                    status.innerText = "❌ 다시 한 번 생각해보세요!";
+                    status.className = "font-bold text-2xl text-red-500 text-center";
+                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 생각할 거리:</strong><br>${q.hints}</div>`;
+                    actionBtn.innerText = "다시 입력하기";
+                    actionBtn.onclick = () => { feedbackArea.classList.add('hidden'); input.value = ''; input.focus(); };
+                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-orange-500 text-white shadow-lg";
+                    document.getElementById('problem-points').innerText = `획득 가능: +10`;
+                }
+            }
+        };
+
+        window.nextQuestion = () => {
+            currentIdx++;
+            if (currentIdx < questions.length) loadQuestion();
+            else showResult();
+        };
+
+        const showResult = () => {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('result-report').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = `${totalScore}점`;
+        };
+
+        window.submitPortfolio = async () => {
+            const sid = document.getElementById('student-id').value.trim();
+            const sname = document.getElementById('student-name').value.trim();
+            const summary = document.getElementById('learning-summary').value.trim();
+            const status = document.getElementById('submit-status');
+            if(!sid || !sname || !summary) {
+                status.innerText = "빈 칸을 모두 채워주세요!";
+                status.className = "mt-4 text-center font-bold text-red-500";
+                return;
+            }
+            status.innerText = "데이터 전송 중...";
+            try {
+                if (user) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
+                        studentId: sid, studentName: sname, score: totalScore, summary: summary, timestamp: new Date().toISOString()
+                    });
+                    status.innerText = "✅ 성공적으로 제출되었습니다!";
+                    status.className = "mt-4 text-center font-bold text-green-600";
+                    document.getElementById('submit-btn').disabled = true;
+                    document.getElementById('submit-btn').classList.add('opacity-50');
+                }
+            } catch (err) { status.innerText = "전송 오류 발생"; }
+        };
+
+        window.toggleAdmin = () => {
+            const panel = document.getElementById('admin-panel');
+            if (panel.classList.contains('hidden')) {
+                if (prompt("관리자 암호를 입력하세요:") === "1234") {
+                    panel.classList.remove('hidden');
+                    loadAdminData();
+                }
+            } else panel.classList.add('hidden');
+        };
+
+        const loadAdminData = () => {
+            const listEl = document.getElementById('admin-portfolio-list');
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'));
+            onSnapshot(q, (snapshot) => {
+                listEl.innerHTML = '';
+                allSubmittedData = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    allSubmittedData.push(data);
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `<td class="p-4 font-bold border-b">${data.studentId}</td><td class="p-4 border-b">${data.studentName}</td><td class="p-4 text-center font-bold text-blue-600 border-b">${data.score}</td><td class="p-4 text-sm border-b">${data.summary}</td><td class="p-4 text-right text-xs text-slate-400 border-b">${new Date(data.timestamp).toLocaleString()}</td>`;
+                    listEl.appendChild(tr);
+                });
+            });
+        };
+
+        window.downloadCSV = () => {
+            if (allSubmittedData.length === 0) return;
+            let csv = "\uFEFF학번,이름,점수,학습내용,제출시간\n";
+            allSubmittedData.forEach(i => csv += `"${i.studentId}","${i.studentName}","${i.score}","${i.summary.replace(/"/g, '""')}","${i.timestamp}"\n`);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `질량보존_포트폴리오_${new Date().toLocaleDateString()}.csv`;
+            link.click();
+        };
+    </script>
+</body>
+</html>
