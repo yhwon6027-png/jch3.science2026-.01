@@ -50,7 +50,6 @@
         <!-- Header -->
         <header class="text-center mb-8 relative border-b pb-6">
             <h1 class="text-3xl font-black text-blue-900 mb-2">🧪 질량 보존 법칙 마스터</h1>
-            <!-- 교사용 관리 패널 버튼이 학생 화면에서 제거되었습니다 -->
         </header>
 
         <!-- Section 1: Intro Quiz -->
@@ -155,20 +154,17 @@
             </div>
         </div>
 
-        <!-- Admin Panel (내부적으로만 존재) -->
+        <!-- Admin Panel (숨김) -->
         <div id="admin-panel" class="fixed inset-0 bg-slate-900/95 z-50 p-4 md:p-10 hidden overflow-y-auto">
             <div class="max-w-5xl mx-auto">
                 <div class="flex justify-between items-center mb-8 text-white">
-                    <h2 class="text-3xl font-black">📊 학생 데이터 관리 (백업)</h2>
-                    <div class="flex gap-2">
-                        <button onclick="window.downloadCSV()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm">엑셀 저장</button>
-                        <button onclick="window.toggleAdmin()" class="bg-white/10 px-4 py-2 rounded-lg">닫기</button>
-                    </div>
+                    <h2 class="text-3xl font-black">📊 데이터 백업 확인</h2>
+                    <button onclick="window.toggleAdmin()" class="bg-white/10 px-4 py-2 rounded-lg text-white">닫기</button>
                 </div>
                 <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-100 text-slate-600 font-bold">
-                            <tr><th class="p-4">학번</th><th class="p-4">이름</th><th class="p-4 text-center">점수</th><th class="p-4">내용</th><th class="p-4 text-right">제출일시</th></tr>
+                            <tr><th class="p-4">학번</th><th class="p-4">이름</th><th class="p-4 text-center">점수</th><th class="p-4">내용</th></tr>
                         </thead>
                         <tbody id="admin-portfolio-list" class="divide-y divide-slate-100"></tbody>
                     </table>
@@ -182,7 +178,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
         import { getFirestore, collection, addDoc, onSnapshot, query } from "firebase/firestore";
 
-        // 1. Firebase 설정
+        // 1. Firebase 초기화
         const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-game';
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -191,11 +187,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 2. 구글 시트 연동 설정 (제공된 Web App URL 적용)
+        // 2. 구글 시트 Web App URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOWPbzjZJJvkbxGpwwNcuTevqhVAJHUzhrdgG_Q-Xh6xbod53dHNHO0hYItbpOJvw_rQ/exec"; 
 
         let user = null;
-        let allSubmittedData = [];
         let currentIdx = 0;
         let totalScore = 0;
         let failCount = 0;
@@ -208,15 +203,17 @@
             { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소 원자 2개와 염소 원자 2개가 각각 반응합니다. 이들이 1:1로 결합하여 생성되는 HCl은 총 몇 분자가 될지 생각해보세요." }
         ];
 
-        // 초기화 및 인증
+        // 인증 로직
         const initAuth = async () => {
-            if (initialToken) await signInWithCustomToken(auth, initialToken);
-            else await signInAnonymously(auth);
+            try {
+                if (initialToken) await signInWithCustomToken(auth, initialToken);
+                else await signInAnonymously(auth);
+            } catch (e) { console.error("Auth Error", e); }
         };
         onAuthStateChanged(auth, (u) => { user = u; });
         initAuth();
 
-        // 윈도우 전역 함수 노출
+        // [핵심 해결] 모든 버튼 클릭 함수를 window 객체에 할당하여 글로벌 스코프 문제 해결
         window.checkIntro = (val) => {
             if (val === 2) {
                 document.getElementById('intro-quiz').classList.add('hidden');
@@ -233,68 +230,18 @@
             loadQuestion();
         };
 
-        const renderHearts = () => {
-            const container = document.getElementById('lives-display');
-            container.innerHTML = '';
-            for (let i = 0; i < 2; i++) {
-                const heart = document.createElement('span');
-                heart.className = i < (2 - failCount) ? "heart" : "heart heart-empty";
-                heart.innerText = "❤️";
-                container.appendChild(heart);
-            }
-        };
-
-        const loadQuestion = () => {
-            const q = questions[currentIdx];
-            failCount = 0;
-            renderHearts();
-            document.getElementById('question-number').innerText = `문제 ${currentIdx + 1} / ${questions.length}`;
-            document.getElementById('current-score').innerText = `${totalScore}점`;
-            document.getElementById('problem-points').innerText = `획득 가능: +20`;
-            document.getElementById('equation-display').innerHTML = formatEquation(q.equation);
-            document.getElementById('feedback-area').classList.add('hidden');
-            const input = document.getElementById('user-answer');
-            input.value = '';
-            input.disabled = false;
-            document.getElementById('submit-ans-btn').disabled = false;
-            input.focus();
-        };
-
-        function formatEquation(eqText) {
-            const container = document.createElement('div');
-            container.className = "equation-text";
-            const parts = eqText.split(/(\s\+\s|\s→\s|\?)/);
-            parts.forEach(part => {
-                if (part === "?") {
-                    const span = document.createElement('span');
-                    span.className = "q-box";
-                    span.id = "target-box";
-                    span.innerText = "?";
-                    container.appendChild(span);
-                } else if (part === " + " || part === " → ") {
-                    const span = document.createElement('span');
-                    span.className = "mx-4 text-blue-400";
-                    span.innerText = part.trim();
-                    container.appendChild(span);
-                } else if (part.trim() !== "") {
-                    const span = document.createElement('span');
-                    span.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
-                    container.appendChild(span);
-                }
-            });
-            return container.outerHTML;
-        }
-
         window.checkAnswer = () => {
             const input = document.getElementById('user-answer');
             const userAns = parseInt(input.value);
             if (isNaN(userAns)) return;
+
             const q = questions[currentIdx];
             const feedbackArea = document.getElementById('feedback-area');
             const status = document.getElementById('feedback-status');
             const hintBox = document.getElementById('hint-box');
             const actionBtn = document.getElementById('action-btn');
             const targetBox = document.getElementById('target-box');
+            
             feedbackArea.classList.remove('hidden');
 
             if (userAns === q.correct) {
@@ -341,13 +288,6 @@
             else showResult();
         };
 
-        const showResult = () => {
-            document.getElementById('game-container').classList.add('hidden');
-            document.getElementById('result-report').classList.remove('hidden');
-            document.getElementById('final-score-text').innerText = `${totalScore}점`;
-        };
-
-        // 포트폴리오 제출 및 구글 시트 전송
         window.submitPortfolio = async () => {
             const sid = document.getElementById('student-id').value.trim();
             const sname = document.getElementById('student-name').value.trim();
@@ -364,15 +304,14 @@
             status.className = "mt-4 text-center font-bold text-blue-500";
 
             try {
-                // 1. Firebase 백업 저장
+                // 1. Firebase 백업
                 if (user) {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
                         studentId: sid, studentName: sname, score: totalScore, summary: summary, timestamp: new Date().toISOString()
                     });
                 }
 
-                // 2. 구글 시트로 데이터 전송
-                // Web App URL에 파라미터를 실어 보냄
+                // 2. 구글 시트 전송
                 const url = new URL(GOOGLE_SCRIPT_URL);
                 url.searchParams.append('sid', sid);
                 url.searchParams.append('name', sname);
@@ -381,53 +320,98 @@
 
                 await fetch(url, { method: 'POST', mode: 'no-cors' });
 
-                status.innerText = "✅ 성공적으로 제출 및 시트에 기록되었습니다!";
+                status.innerText = "✅ 성공적으로 제출되었습니다!";
                 status.className = "mt-4 text-center font-bold text-green-600";
                 document.getElementById('submit-btn').disabled = true;
                 document.getElementById('submit-btn').classList.add('opacity-50');
             } catch (err) { 
                 console.error(err);
-                status.innerText = "전송 중 오류가 발생했습니다.";
+                status.innerText = "전송 중 오류 발생";
                 status.className = "mt-4 text-center font-bold text-red-500";
             }
         };
 
-        // 관리자 패널 (숨김 처리됨, 콘솔창에서 window.toggleAdmin()으로 호출 가능)
+        // 관리자 패널용 (콘솔에서 window.toggleAdmin() 호출 시만 작동)
         window.toggleAdmin = () => {
             const panel = document.getElementById('admin-panel');
             if (panel.classList.contains('hidden')) {
-                if (prompt("관리자 암호:") === "1234") {
+                if (prompt("Pass:") === "1234") {
                     panel.classList.remove('hidden');
                     loadAdminData();
                 }
             } else panel.classList.add('hidden');
         };
 
+        const loadQuestion = () => {
+            const q = questions[currentIdx];
+            failCount = 0;
+            renderHearts();
+            document.getElementById('question-number').innerText = `문제 ${currentIdx + 1} / ${questions.length}`;
+            document.getElementById('current-score').innerText = `${totalScore}점`;
+            document.getElementById('problem-points').innerText = `획득 가능: +20`;
+            document.getElementById('equation-display').innerHTML = formatEquation(q.equation);
+            document.getElementById('feedback-area').classList.add('hidden');
+            const input = document.getElementById('user-answer');
+            input.value = '';
+            input.disabled = false;
+            document.getElementById('submit-ans-btn').disabled = false;
+            input.focus();
+        };
+
+        const renderHearts = () => {
+            const container = document.getElementById('lives-display');
+            container.innerHTML = '';
+            for (let i = 0; i < 2; i++) {
+                const heart = document.createElement('span');
+                heart.className = i < (2 - failCount) ? "heart" : "heart heart-empty";
+                heart.innerText = "❤️";
+                container.appendChild(heart);
+            }
+        };
+
+        const showResult = () => {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('result-report').classList.remove('hidden');
+            document.getElementById('final-score-text').innerText = `${totalScore}점`;
+        };
+
+        function formatEquation(eqText) {
+            const container = document.createElement('div');
+            container.className = "equation-text";
+            const parts = eqText.split(/(\s\+\s|\s→\s|\?)/);
+            parts.forEach(part => {
+                if (part === "?") {
+                    const span = document.createElement('span');
+                    span.className = "q-box";
+                    span.id = "target-box";
+                    span.innerText = "?";
+                    container.appendChild(span);
+                } else if (part === " + " || part === " → ") {
+                    const span = document.createElement('span');
+                    span.className = "mx-4 text-blue-400";
+                    span.innerText = part.trim();
+                    container.appendChild(span);
+                } else if (part.trim() !== "") {
+                    const span = document.createElement('span');
+                    span.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
+                    container.appendChild(span);
+                }
+            });
+            return container.outerHTML;
+        }
+
         const loadAdminData = () => {
             const listEl = document.getElementById('admin-portfolio-list');
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'));
             onSnapshot(q, (snapshot) => {
                 listEl.innerHTML = '';
-                allSubmittedData = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    allSubmittedData.push(data);
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td class="p-4 border-b font-bold">${data.studentId}</td><td class="p-4 border-b">${data.studentName}</td><td class="p-4 border-b text-center text-blue-600 font-bold">${data.score}</td><td class="p-4 border-b text-sm">${data.summary}</td><td class="p-4 border-b text-right text-xs text-slate-400">${new Date(data.timestamp).toLocaleString()}</td>`;
+                    tr.innerHTML = `<td class="p-4 border-b font-bold">${data.studentId}</td><td class="p-4 border-b">${data.studentName}</td><td class="p-4 border-b text-center">${data.score}</td><td class="p-4 border-b text-sm">${data.summary}</td>`;
                     listEl.appendChild(tr);
                 });
             });
-        };
-
-        window.downloadCSV = () => {
-            if (allSubmittedData.length === 0) return;
-            let csv = "\uFEFF학번,이름,점수,학습요약,제출시간\n";
-            allSubmittedData.forEach(i => csv += `"${i.studentId}","${i.studentName}","${i.score}","${i.summary.replace(/"/g, '""')}","${i.timestamp}"\n`);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `질량보존_포트폴리오_${new Date().toLocaleDateString()}.csv`;
-            link.click();
         };
     </script>
 </body>
