@@ -56,10 +56,10 @@
         <div id="intro-quiz" class="bg-white rounded-2xl shadow-xl p-8 card fade-in text-center">
             <h2 class="text-2xl font-bold mb-6">입장 퀴즈: 질량 보존 법칙의 정의</h2>
             <div class="grid gap-4">
-                <button onclick="window.checkIntro(2)" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left">
+                <button type="button" id="btn-intro-correct" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-blue-50 hover:border-blue-200 transition-all text-left">
                     <span class="text-blue-600 font-bold mr-2">A.</span> 반응물의 총 질량과 생성물의 총 질량은 항상 같다.
                 </button>
-                <button onclick="window.checkIntro(1)" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left">
+                <button type="button" id="btn-intro-wrong" class="p-4 border-2 border-slate-100 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all text-left">
                     <span class="text-red-400 font-bold mr-2">B.</span> 기체가 발생하는 반응에서는 질량이 항상 줄어든다.
                 </button>
             </div>
@@ -87,7 +87,7 @@
                     <p class="text-slate-700"><b>기회:</b> 문제당 ❤️❤️ (2번)의 기회가 있습니다.</p>
                 </div>
             </div>
-            <button onclick="window.startGame()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
+            <button type="button" id="btn-start-game" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
                 게임 시작하기!
             </button>
         </div>
@@ -112,14 +112,14 @@
             <div class="flex flex-col items-center gap-4">
                 <div class="flex items-center gap-3 w-full max-w-xs">
                     <input type="number" id="user-answer" class="w-full p-4 border-4 border-slate-100 rounded-2xl text-center text-3xl font-bold focus:border-blue-500 outline-none transition-all" placeholder="?">
-                    <button id="submit-ans-btn" onclick="window.checkAnswer()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all">확인</button>
+                    <button type="button" id="submit-ans-btn" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-lg whitespace-nowrap transition-all">확인</button>
                 </div>
             </div>
             
             <div id="feedback-area" class="mt-8 p-6 bg-slate-50 rounded-2xl hidden border-2 border-slate-100">
                 <p id="feedback-status" class="font-bold text-xl mb-2"></p>
                 <div id="hint-box" class="text-slate-600 leading-relaxed mb-4"></div>
-                <button id="action-btn" class="w-full py-4 rounded-xl font-black text-lg shadow-md"></button>
+                <button type="button" id="action-btn" class="w-full py-4 rounded-xl font-black text-lg shadow-md"></button>
             </div>
         </div>
 
@@ -147,19 +147,19 @@
                     <label class="block text-xs font-bold text-slate-400 mb-1 ml-1">학습 요약 (C열)</label>
                     <textarea id="learning-summary" rows="3" placeholder="질량 보존 법칙의 원리와 오늘 게임을 통해 배운 점을 적어보세요." class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-xl outline-none resize-none"></textarea>
                 </div>
-                <button onclick="window.submitPortfolio()" id="submit-btn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
+                <button type="button" id="btn-submit-portfolio" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-blue-700 shadow-xl transition-all">
                     포트폴리오 제출 및 구글 시트 전송
                 </button>
                 <p id="submit-status" class="mt-4 text-center font-bold"></p>
             </div>
         </div>
 
-        <!-- Admin Panel (숨김) -->
+        <!-- Admin Panel -->
         <div id="admin-panel" class="fixed inset-0 bg-slate-900/95 z-50 p-4 md:p-10 hidden overflow-y-auto">
             <div class="max-w-5xl mx-auto">
                 <div class="flex justify-between items-center mb-8 text-white">
                     <h2 class="text-3xl font-black">📊 데이터 백업 확인</h2>
-                    <button onclick="window.toggleAdmin()" class="bg-white/10 px-4 py-2 rounded-lg text-white">닫기</button>
+                    <button type="button" id="btn-close-admin" class="bg-white/10 px-4 py-2 rounded-lg text-white">닫기</button>
                 </div>
                 <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
                     <table class="w-full text-left border-collapse">
@@ -178,7 +178,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
         import { getFirestore, collection, addDoc, onSnapshot, query } from "firebase/firestore";
 
-        // 1. Firebase 초기화
+        // 1. Firebase 설정
         const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'chem-balance-game';
         const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -187,7 +187,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 2. 구글 시트 Web App URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOWPbzjZJJvkbxGpwwNcuTevqhVAJHUzhrdgG_Q-Xh6xbod53dHNHO0hYItbpOJvw_rQ/exec"; 
 
         let user = null;
@@ -203,7 +202,7 @@
             { id: 5, equation: "H2 + Cl2 → ?HCl", correct: 2, hints: "수소 원자 2개와 염소 원자 2개가 각각 반응합니다. 이들이 1:1로 결합하여 생성되는 HCl은 총 몇 분자가 될지 생각해보세요." }
         ];
 
-        // 인증 로직
+        // 2. 인증 로직
         const initAuth = async () => {
             try {
                 if (initialToken) await signInWithCustomToken(auth, initialToken);
@@ -213,133 +212,22 @@
         onAuthStateChanged(auth, (u) => { user = u; });
         initAuth();
 
-        // [핵심 해결] 모든 버튼 클릭 함수를 window 객체에 할당하여 글로벌 스코프 문제 해결
-        window.checkIntro = (val) => {
-            if (val === 2) {
+        // 3. 게임 기능 함수 정의
+        const checkIntro = (isCorrect) => {
+            if (isCorrect) {
                 document.getElementById('intro-quiz').classList.add('hidden');
                 document.getElementById('rules-guide').classList.remove('hidden');
             } else {
-                document.getElementById('intro-msg').classList.remove('hidden');
-                setTimeout(() => document.getElementById('intro-msg').classList.add('hidden'), 2000);
+                const msg = document.getElementById('intro-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
             }
         };
 
-        window.startGame = () => {
+        const startGame = () => {
             document.getElementById('rules-guide').classList.add('hidden');
             document.getElementById('game-container').classList.remove('hidden');
             loadQuestion();
-        };
-
-        window.checkAnswer = () => {
-            const input = document.getElementById('user-answer');
-            const userAns = parseInt(input.value);
-            if (isNaN(userAns)) return;
-
-            const q = questions[currentIdx];
-            const feedbackArea = document.getElementById('feedback-area');
-            const status = document.getElementById('feedback-status');
-            const hintBox = document.getElementById('hint-box');
-            const actionBtn = document.getElementById('action-btn');
-            const targetBox = document.getElementById('target-box');
-            
-            feedbackArea.classList.remove('hidden');
-
-            if (userAns === q.correct) {
-                let awarded = (failCount === 0) ? 20 : 10;
-                totalScore += awarded;
-                status.innerText = "🎉 정답입니다!";
-                status.className = "font-bold text-2xl text-green-600 text-center";
-                hintBox.innerText = "질량 보존의 법칙을 정확히 이해하셨군요!";
-                actionBtn.innerText = "다음 문제";
-                actionBtn.onclick = window.nextQuestion;
-                actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
-                input.disabled = true;
-                document.getElementById('submit-ans-btn').disabled = true;
-                targetBox.innerText = q.correct;
-            } else {
-                failCount++;
-                renderHearts();
-                totalScore = Math.max(0, totalScore - 20);
-                document.getElementById('current-score').innerText = `${totalScore}점`;
-                
-                if(failCount >= 2) {
-                    status.innerText = "기회를 모두 소진했습니다.";
-                    status.className = "font-bold text-2xl text-slate-500 text-center";
-                    hintBox.innerHTML = `정답 계수는 <b>${q.correct}</b>입니다.`;
-                    actionBtn.innerText = "다음 문제로 이동";
-                    actionBtn.onclick = window.nextQuestion;
-                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-700 text-white shadow-lg";
-                    targetBox.innerText = q.correct;
-                } else {
-                    status.innerText = "❌ 오답입니다!";
-                    status.className = "font-bold text-2xl text-red-500 text-center";
-                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 힌트:</strong><br>${q.hints}</div>`;
-                    actionBtn.innerText = "다시 도전";
-                    actionBtn.onclick = () => { feedbackArea.classList.add('hidden'); input.value = ''; input.focus(); };
-                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-orange-500 text-white shadow-lg";
-                    document.getElementById('problem-points').innerText = `획득 가능: +10`;
-                }
-            }
-        };
-
-        window.nextQuestion = () => {
-            currentIdx++;
-            if (currentIdx < questions.length) loadQuestion();
-            else showResult();
-        };
-
-        window.submitPortfolio = async () => {
-            const sid = document.getElementById('student-id').value.trim();
-            const sname = document.getElementById('student-name').value.trim();
-            const summary = document.getElementById('learning-summary').value.trim();
-            const status = document.getElementById('submit-status');
-            
-            if(!sid || !sname || !summary) {
-                status.innerText = "모든 정보를 입력해주세요!";
-                status.className = "mt-4 text-center font-bold text-red-500";
-                return;
-            }
-
-            status.innerText = "데이터 전송 중...";
-            status.className = "mt-4 text-center font-bold text-blue-500";
-
-            try {
-                // 1. Firebase 백업
-                if (user) {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
-                        studentId: sid, studentName: sname, score: totalScore, summary: summary, timestamp: new Date().toISOString()
-                    });
-                }
-
-                // 2. 구글 시트 전송
-                const url = new URL(GOOGLE_SCRIPT_URL);
-                url.searchParams.append('sid', sid);
-                url.searchParams.append('name', sname);
-                url.searchParams.append('summary', summary);
-                url.searchParams.append('score', totalScore);
-
-                await fetch(url, { method: 'POST', mode: 'no-cors' });
-
-                status.innerText = "✅ 성공적으로 제출되었습니다!";
-                status.className = "mt-4 text-center font-bold text-green-600";
-                document.getElementById('submit-btn').disabled = true;
-                document.getElementById('submit-btn').classList.add('opacity-50');
-            } catch (err) { 
-                console.error(err);
-                status.innerText = "전송 중 오류 발생";
-                status.className = "mt-4 text-center font-bold text-red-500";
-            }
-        };
-
-        // 관리자 패널용 (콘솔에서 window.toggleAdmin() 호출 시만 작동)
-        window.toggleAdmin = () => {
-            const panel = document.getElementById('admin-panel');
-            if (panel.classList.contains('hidden')) {
-                if (prompt("Pass:") === "1234") {
-                    panel.classList.remove('hidden');
-                    loadAdminData();
-                }
-            } else panel.classList.add('hidden');
         };
 
         const loadQuestion = () => {
@@ -348,25 +236,71 @@
             renderHearts();
             document.getElementById('question-number').innerText = `문제 ${currentIdx + 1} / ${questions.length}`;
             document.getElementById('current-score').innerText = `${totalScore}점`;
-            document.getElementById('problem-points').innerText = `획득 가능: +20`;
             document.getElementById('equation-display').innerHTML = formatEquation(q.equation);
             document.getElementById('feedback-area').classList.add('hidden');
             const input = document.getElementById('user-answer');
             input.value = '';
             input.disabled = false;
             document.getElementById('submit-ans-btn').disabled = false;
-            input.focus();
+            setTimeout(() => input.focus(), 100);
         };
 
-        const renderHearts = () => {
-            const container = document.getElementById('lives-display');
-            container.innerHTML = '';
-            for (let i = 0; i < 2; i++) {
-                const heart = document.createElement('span');
-                heart.className = i < (2 - failCount) ? "heart" : "heart heart-empty";
-                heart.innerText = "❤️";
-                container.appendChild(heart);
+        const checkAnswer = () => {
+            const input = document.getElementById('user-answer');
+            const val = parseInt(input.value);
+            if (isNaN(val)) return;
+
+            const q = questions[currentIdx];
+            const feedbackArea = document.getElementById('feedback-area');
+            feedbackArea.classList.remove('hidden');
+
+            const status = document.getElementById('feedback-status');
+            const hintBox = document.getElementById('hint-box');
+            const actionBtn = document.getElementById('action-btn');
+
+            if (val === q.correct) {
+                let awarded = (failCount === 0) ? 20 : 10;
+                totalScore += awarded;
+                status.innerText = "🎉 정답입니다!";
+                status.className = "font-bold text-2xl text-green-600 text-center";
+                hintBox.innerText = "훌륭합니다! 질량 보존 법칙을 완벽히 이해하셨네요.";
+                actionBtn.innerText = "다음 문제";
+                actionBtn.onclick = nextQuestion;
+                actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-green-600 text-white shadow-lg";
+                input.disabled = true;
+                document.getElementById('submit-ans-btn').disabled = true;
+                const target = document.getElementById('target-box');
+                if(target) target.innerText = q.correct;
+            } else {
+                failCount++;
+                renderHearts();
+                totalScore = Math.max(0, totalScore - 10);
+                document.getElementById('current-score').innerText = `${totalScore}점`;
+
+                if (failCount >= 2) {
+                    status.innerText = "기회를 모두 소진했습니다.";
+                    status.className = "font-bold text-2xl text-slate-500 text-center";
+                    hintBox.innerHTML = `정답 계수는 <b>${q.correct}</b>였습니다.`;
+                    actionBtn.innerText = "다음 문제로";
+                    actionBtn.onclick = nextQuestion;
+                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-slate-700 text-white shadow-lg";
+                    const target = document.getElementById('target-box');
+                    if(target) target.innerText = q.correct;
+                } else {
+                    status.innerText = "❌ 오답입니다!";
+                    status.className = "font-bold text-2xl text-red-500 text-center";
+                    hintBox.innerHTML = `<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400"><strong>💡 힌트:</strong><br>${q.hints}</div>`;
+                    actionBtn.innerText = "다시 시도";
+                    actionBtn.onclick = () => { feedbackArea.classList.add('hidden'); input.value = ''; input.focus(); };
+                    actionBtn.className = "w-full py-4 rounded-xl font-black text-lg bg-orange-500 text-white shadow-lg";
+                }
             }
+        };
+
+        const nextQuestion = () => {
+            currentIdx++;
+            if (currentIdx < questions.length) loadQuestion();
+            else showResult();
         };
 
         const showResult = () => {
@@ -375,43 +309,112 @@
             document.getElementById('final-score-text').innerText = `${totalScore}점`;
         };
 
-        function formatEquation(eqText) {
-            const container = document.createElement('div');
-            container.className = "equation-text";
-            const parts = eqText.split(/(\s\+\s|\s→\s|\?)/);
-            parts.forEach(part => {
-                if (part === "?") {
-                    const span = document.createElement('span');
-                    span.className = "q-box";
-                    span.id = "target-box";
-                    span.innerText = "?";
-                    container.appendChild(span);
-                } else if (part === " + " || part === " → ") {
-                    const span = document.createElement('span');
-                    span.className = "mx-4 text-blue-400";
-                    span.innerText = part.trim();
-                    container.appendChild(span);
-                } else if (part.trim() !== "") {
-                    const span = document.createElement('span');
-                    span.innerHTML = part.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
-                    container.appendChild(span);
+        const renderHearts = () => {
+            const container = document.getElementById('lives-display');
+            container.innerHTML = '';
+            for (let i = 0; i < 2; i++) {
+                const h = document.createElement('span');
+                h.className = i < (2 - failCount) ? "heart" : "heart heart-empty";
+                h.innerText = "❤️";
+                container.appendChild(h);
+            }
+        };
+
+        function formatEquation(txt) {
+            const div = document.createElement('div');
+            div.className = "equation-text";
+            txt.split(/(\s\+\s|\s→\s|\?)/).forEach(p => {
+                const s = document.createElement('span');
+                if (p === "?") {
+                    s.className = "q-box";
+                    s.id = "target-box";
+                    s.innerText = "?";
+                } else if (p === " + " || p === " → ") {
+                    s.className = "mx-4 text-blue-400";
+                    s.innerText = p.trim();
+                } else if (p.trim()) {
+                    s.innerHTML = p.trim().replace(/([A-Z][a-z]?)(\d+)/g, '$1<span class="sub">$2</span>');
                 }
+                div.appendChild(s);
             });
-            return container.outerHTML;
+            return div.outerHTML;
         }
 
-        const loadAdminData = () => {
-            const listEl = document.getElementById('admin-portfolio-list');
+        const submitPortfolio = async () => {
+            const sid = document.getElementById('student-id').value.trim();
+            const sname = document.getElementById('student-name').value.trim();
+            const summary = document.getElementById('learning-summary').value.trim();
+            const status = document.getElementById('submit-status');
+
+            if(!sid || !sname || !summary) {
+                status.innerText = "학번, 이름, 소감을 모두 입력해주세요.";
+                status.className = "mt-4 text-center font-bold text-red-500";
+                return;
+            }
+
+            status.innerText = "전송 중...";
+            status.className = "mt-4 text-center font-bold text-blue-500";
+
+            try {
+                if (user) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'), {
+                        sid, sname, score: totalScore, summary, time: new Date().toISOString()
+                    });
+                }
+                const url = new URL(GOOGLE_SCRIPT_URL);
+                url.searchParams.append('sid', sid);
+                url.searchParams.append('name', sname);
+                url.searchParams.append('summary', summary);
+                url.searchParams.append('score', totalScore);
+                await fetch(url, { method: 'POST', mode: 'no-cors' });
+                
+                status.innerText = "✅ 성공적으로 제출되었습니다!";
+                status.className = "mt-4 text-center font-bold text-green-600";
+                document.getElementById('btn-submit-portfolio').disabled = true;
+                document.getElementById('btn-submit-portfolio').style.opacity = "0.5";
+            } catch (e) {
+                status.innerText = "제출 중 오류가 발생했습니다.";
+            }
+        };
+
+        // 4. 이벤트 리스너 수동 연결 (가장 확실한 방법)
+        document.getElementById('btn-intro-correct').addEventListener('click', () => checkIntro(true));
+        document.getElementById('btn-intro-wrong').addEventListener('click', () => checkIntro(false));
+        document.getElementById('btn-start-game').addEventListener('click', startGame);
+        document.getElementById('submit-ans-btn').addEventListener('click', checkAnswer);
+        document.getElementById('btn-submit-portfolio').addEventListener('click', submitPortfolio);
+        document.getElementById('btn-close-admin').addEventListener('click', () => document.getElementById('admin-panel').classList.add('hidden'));
+
+        // 전역 접근용 (기존 방식 호환)
+        window.checkIntro = checkIntro;
+        window.startGame = startGame;
+        window.checkAnswer = checkAnswer;
+        window.nextQuestion = nextQuestion;
+        window.submitPortfolio = submitPortfolio;
+
+        // 관리자 패널 관련
+        window.toggleAdmin = () => {
+            const p = document.getElementById('admin-panel');
+            if(p.classList.contains('hidden')) {
+                if(prompt("Pass:") === "1234") {
+                    p.classList.remove('hidden');
+                    loadAdmin();
+                }
+            } else p.classList.add('hidden');
+        };
+
+        const loadAdmin = () => {
+            const body = document.getElementById('admin-portfolio-list');
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'portfolios'));
-            onSnapshot(q, (snapshot) => {
-                listEl.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
+            onSnapshot(q, (snap) => {
+                body.innerHTML = '';
+                snap.forEach(d => {
+                    const row = d.data();
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td class="p-4 border-b font-bold">${data.studentId}</td><td class="p-4 border-b">${data.studentName}</td><td class="p-4 border-b text-center">${data.score}</td><td class="p-4 border-b text-sm">${data.summary}</td>`;
-                    listEl.appendChild(tr);
+                    tr.innerHTML = `<td class="p-4 border-b font-bold">${row.sid}</td><td class="p-4 border-b">${row.sname}</td><td class="p-4 border-b text-center">${row.score}</td><td class="p-4 border-b text-sm">${row.summary}</td>`;
+                    body.appendChild(tr);
                 });
-            });
+            }, (err) => console.error("Admin Load Error", err));
         };
     </script>
 </body>
