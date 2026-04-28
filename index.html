@@ -193,25 +193,25 @@
 
             onAuthStateChanged(auth, (u) => { user = u; });
 
-            // 이벤트 리스너 명시적 연결
+            // 이벤트 리스너 명시적 연결 (DOM 요소 로드 보장)
             const btnCorrect = document.getElementById('btn-intro-correct');
             const btnWrong = document.getElementById('btn-intro-wrong');
             const btnStart = document.getElementById('btn-start-game');
             const btnSubmitAns = document.getElementById('submit-ans-btn');
             const btnPortfolio = document.getElementById('btn-submit-portfolio');
 
-            if(btnCorrect) btnCorrect.onclick = () => checkIntro(true);
-            if(btnWrong) btnWrong.onclick = () => checkIntro(false);
-            if(btnStart) btnStart.onclick = startGame;
-            if(btnSubmitAns) btnSubmitAns.onclick = checkAnswer;
-            if(btnPortfolio) btnPortfolio.onclick = submitPortfolio;
+            if(btnCorrect) btnCorrect.addEventListener('click', () => checkIntro(true));
+            if(btnWrong) btnWrong.addEventListener('click', () => checkIntro(false));
+            if(btnStart) btnStart.addEventListener('click', startGame);
+            if(btnSubmitAns) btnSubmitAns.addEventListener('click', checkAnswer);
+            if(btnPortfolio) btnPortfolio.addEventListener('click', submitPortfolio);
 
             // 엔터키 입력 지원
             const answerInput = document.getElementById('user-answer');
             if(answerInput) {
-                answerInput.onkeypress = (e) => {
+                answerInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') checkAnswer();
-                };
+                });
             }
         };
 
@@ -220,7 +220,6 @@
             if (isCorrect) {
                 document.getElementById('intro-quiz').classList.add('hidden');
                 document.getElementById('rules-guide').classList.remove('hidden');
-                console.log("정답 클릭 - 규칙 안내로 이동");
             } else {
                 const msg = document.getElementById('intro-msg');
                 msg.classList.remove('hidden');
@@ -392,7 +391,11 @@
         }
 
         // 초기화 실행
-        window.onload = init;
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
